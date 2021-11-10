@@ -58,15 +58,8 @@ public class SolicitudServiceImpl implements ISolicitudService {
 		try {
 			if (token == null) {
 				throw new ValidacionDatosException("El token es invalido");
-			}
-
-			long idSolicitud = iSolicitudDao.crearSolicitud(solicitud);
-
-			// Si se crea exitosamente se agrega a la cola SQS
-			if (idSolicitud != 0) {
-				solicitud.setIdSolicitud((int) idSolicitud);
+			} else {
 				String solicitudJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(solicitud);
-
 				// Se inserta en la cola
 				iSqsService.pushSqsSolicitud(solicitudJson, token);
 			}
@@ -163,5 +156,24 @@ public class SolicitudServiceImpl implements ISolicitudService {
 			throw GeneralException.throwException(this, e);
 		}
 		return request;
+	}
+
+	public String autenticar() throws Exception {
+		String token = "";
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			String dir = "https://sb-identity.mybluemix.net/api/v1/sb/login/admin/";
+
+			org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+			HttpEntity<String> request = new HttpEntity<String>(headers);
+			headers.setBasicAuth("karen-calderon@javeriana.edu.co", "1234567890");
+
+			String resultAuth = template.exchange(dir, HttpMethod.GET, request, String.class).getBody();
+			JsonNode tokenNode = mapper.readTree(resultAuth);
+			token = tokenNode.get("token").asText();
+		} catch (Exception e) {
+			throw GeneralException.throwException(this, e);
+		}
+		return token;
 	}
 }

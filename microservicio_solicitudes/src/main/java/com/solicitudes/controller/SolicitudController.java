@@ -1,10 +1,7 @@
 package com.solicitudes.controller;
 
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,10 +12,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import com.excepciones.ValidacionDatosException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solicitudes.dto.ErrorDto;
 import com.solicitudes.dto.SolicitudRequest;
 import com.solicitudes.dto.SolicitudResponse;
@@ -26,6 +19,8 @@ import com.solicitudes.model.Solicitud;
 import com.solicitudes.services.IMongoService;
 import com.solicitudes.services.ISolicitudService;
 import com.solicitudes.services.ITokenService;
+
+import io.micrometer.core.annotation.Timed;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -43,26 +38,11 @@ public class SolicitudController {
 	@Autowired
 	ITokenService tokenService;
 
-	String token;
-
-	@PostConstruct
-	public void autenticar() throws JsonMappingException, JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		String dir = "https://sb-identity.mybluemix.net/api/v1/sb/login/admin/";
-
-		org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-		HttpEntity<String> request = new HttpEntity<String>(headers);
-		headers.setBasicAuth("karen-calderon@javeriana.edu.co", "1234567890");
-
-		String resultAuth = template.exchange(dir, HttpMethod.GET, request, String.class).getBody();
-		JsonNode tokenNode = mapper.readTree(resultAuth);
-		token = tokenNode.get("token").asText();
-
-	}
-
+	@Timed("get.solicitudes")
 	@GetMapping(value = "/solicitud/{idUsuarioRevisor}")
-	public SolicitudResponse obtenerSolicitudPorIdUsuarioRevisor(@PathVariable("idUsuarioRevisor") String idUsuarioRevisor,
-			@RequestHeader("Authorization") String auth) throws Exception {
+	public SolicitudResponse obtenerSolicitudPorIdUsuarioRevisor(
+			@PathVariable("idUsuarioRevisor") String idUsuarioRevisor, @RequestHeader("Authorization") String auth)
+			throws Exception {
 		SolicitudResponse response = new SolicitudResponse();
 		try {
 			if (auth != null && auth.startsWith("Bearer")) {
@@ -88,6 +68,7 @@ public class SolicitudController {
 		return response;
 	}
 
+	@Timed("post.solicitudes")
 	@PostMapping(value = "/solicitud")
 	public SolicitudResponse crearSolicitud(@RequestBody SolicitudRequest request,
 			@RequestHeader("Authorization") String auth) throws Exception {
@@ -121,7 +102,7 @@ public class SolicitudController {
 							entidadSolicitud.getNombresCliente() + " " + entidadSolicitud.getApellidosCliente());
 
 					entidadSolicitud.setIdDocumentosAdjuntos(idDocumento);
-					solicitudService.crearSolicitud(entidadSolicitud, token);
+					solicitudService.crearSolicitud(entidadSolicitud, partsToken[1]);
 				}
 			} else {
 				throw new ValidacionDatosException("Ocurrio un error validando la sesion");
@@ -138,6 +119,7 @@ public class SolicitudController {
 		return response;
 	}
 
+	@Timed("put.solicitudes")
 	@PutMapping(value = "/solicitud/{id}")
 	public SolicitudResponse actualizarSolicitud(@RequestBody Solicitud solicitud, @PathVariable("id") int id,
 			@RequestHeader("Authorization") String auth) throws Exception {
@@ -161,6 +143,7 @@ public class SolicitudController {
 		return response;
 	}
 
+	@Timed("get.documentos")
 	@GetMapping(value = "/solicitud/adjuntos/{idDocumentoAdjunto}")
 	public SolicitudResponse obtenerDocumentosAdjuntos(@PathVariable("idDocumentoAdjunto") String idDocumentoAdjunto,
 			@RequestHeader("Authorization") String auth) throws Exception {

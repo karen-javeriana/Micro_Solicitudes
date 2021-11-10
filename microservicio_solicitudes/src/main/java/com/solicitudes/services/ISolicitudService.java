@@ -18,5 +18,7 @@ public interface ISolicitudService {
 	List<UsuarioDto> obtenerUsuariosRevisores(String token) throws Exception;
 
 	ErrorDto setMessageExceptionRequest(Exception ex);
+	
+	String autenticar() throws Exception;
 
 }

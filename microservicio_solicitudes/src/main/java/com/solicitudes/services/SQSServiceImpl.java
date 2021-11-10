@@ -73,9 +73,16 @@ public class SQSServiceImpl implements ISQSService {
 				}
 			}
 			Solicitud solicitud = objectMapper.readValue(mensaje, Solicitud.class);
-			iSolicitudDao.actualizarSolicitudAsignada(solicitud.getIdSolicitud(), "ASIGNADA", idRevisorAsignar);
+
+			solicitud.setEstado("ASIGNADA");
+			solicitud.setIdUsuarioRevisor(idRevisorAsignar);
+			
+			long idSolicitud = iSolicitudDao.crearSolicitud(solicitud);
+
+			//iSolicitudDao.actualizarSolicitudAsignada(solicitud.getIdSolicitud(), "ASIGNADA", idRevisorAsignar);
 
 		} catch (Exception e) {
+			pushSqsSolicitud(mensaje, token);
 			throw GeneralException.throwException(this, e);
 		}
 	}
