@@ -131,7 +131,6 @@ public class SolicitudServiceImpl implements ISolicitudService {
 	private SolicitudRequest convertToEntity(Solicitud solicitudEntity) throws Exception {
 		SolicitudRequest request = new SolicitudRequest();
 		try {
-			request.setNombresCliente(solicitudEntity.getNombresCliente());
 			request.setIdSolicitud(solicitudEntity.getIdSolicitud());
 			request.setIdProducto(solicitudEntity.getIdProducto());
 			request.setEstado(solicitudEntity.getEstado());
@@ -143,6 +142,7 @@ public class SolicitudServiceImpl implements ISolicitudService {
 			request.setNombresCliente(solicitudEntity.getNombresCliente());
 			request.setApellidosCliente(solicitudEntity.getApellidosCliente());
 			request.setNumeroIdentificacion(solicitudEntity.getNumeroIdentificacion());
+			request.setTipoIdentificacion(solicitudEntity.getTipoIdentificacion());
 			request.setEmail(solicitudEntity.getEmail());
 			request.setFoto(solicitudEntity.getFoto());
 			request.setTelefono(solicitudEntity.getTelefono());

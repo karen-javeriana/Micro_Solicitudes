@@ -52,25 +52,25 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 		try {
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put("idProducto", solicitud.getIdProducto());
-			parameters.put("estado", "SIN ASIGNAR");
+			parameters.put("estado", solicitud.getEstado() == null ? "SIN ASIGNAR" : solicitud.getEstado());
 			parameters.put("descripcion", solicitud.getDescripcion());
 			parameters.put("idDocumentosAdjuntos", solicitud.getIdDocumentosAdjuntos());
 			parameters.put("fechaSolicitud", new Date());
-			parameters.put("idUsuarioRevisor", null);
+			parameters.put("idUsuarioRevisor",solicitud.getIdUsuarioRevisor());
 			parameters.put("fechaRevision", null);
 			parameters.put("nombresCliente", solicitud.getNombresCliente());
 			parameters.put("apellidosCliente", solicitud.getApellidosCliente());
 			parameters.put("numeroIdentificacion", solicitud.getNumeroIdentificacion());
 			parameters.put("tipoIdentificacion", solicitud.getTipoIdentificacion());
 			parameters.put("email", solicitud.getEmail());
-			parameters.put("foto",solicitud.getFoto());
-			parameters.put("telefono",solicitud.getTelefono());
-			parameters.put("fechaNacimiento",solicitud.getFechaNacimiento());
-			parameters.put("ciudad",solicitud.getCiudad());
-			parameters.put("pais",solicitud.getPais());
-			parameters.put("idCliente",solicitud.getIdCliente());
-			parameters.put("direccion",solicitud.getDireccion());
-			parameters.put("genero",solicitud.getGenero());
+			parameters.put("foto", solicitud.getFoto());
+			parameters.put("telefono", solicitud.getTelefono());
+			parameters.put("fechaNacimiento", solicitud.getFechaNacimiento());
+			parameters.put("ciudad", solicitud.getCiudad());
+			parameters.put("pais", solicitud.getPais());
+			parameters.put("idCliente", solicitud.getIdCliente());
+			parameters.put("direccion", solicitud.getDireccion());
+			parameters.put("genero", solicitud.getGenero());
 
 			id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
 

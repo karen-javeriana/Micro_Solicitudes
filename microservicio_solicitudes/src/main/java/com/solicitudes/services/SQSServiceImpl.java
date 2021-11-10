@@ -79,8 +79,6 @@ public class SQSServiceImpl implements ISQSService {
 			
 			long idSolicitud = iSolicitudDao.crearSolicitud(solicitud);
 
-			//iSolicitudDao.actualizarSolicitudAsignada(solicitud.getIdSolicitud(), "ASIGNADA", idRevisorAsignar);
-
 		} catch (Exception e) {
 			pushSqsSolicitud(mensaje, token);
 			throw GeneralException.throwException(this, e);

@@ -103,6 +103,7 @@ public class SolicitudController {
 
 					entidadSolicitud.setIdDocumentosAdjuntos(idDocumento);
 					solicitudService.crearSolicitud(entidadSolicitud, partsToken[1]);
+					response.setSucess(true);
 				}
 			} else {
 				throw new ValidacionDatosException("Ocurrio un error validando la sesion");
@@ -130,6 +131,7 @@ public class SolicitudController {
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
 					solicitudService.actualizarSolicitud(solicitud, id);
+					response.setSucess(true);
 				}
 			} else {
 				throw new ValidacionDatosException("Ocurrio un error validando la sesion");
@@ -155,6 +157,7 @@ public class SolicitudController {
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
 					response.setDocumento(mongoService.getDocumentoPorId(idDocumentoAdjunto));
+					response.setSucess(true);
 				}
 			} else {
 				throw new ValidacionDatosException("Ocurrio un error validando la sesion");
