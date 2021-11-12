@@ -15,15 +15,20 @@ import com.excepciones.ValidacionDatosException;
 import com.solicitudes.dto.ErrorDto;
 import com.solicitudes.dto.SolicitudRequest;
 import com.solicitudes.dto.SolicitudResponse;
+import com.solicitudes.model.Documento;
 import com.solicitudes.model.Solicitud;
 import com.solicitudes.services.IMongoService;
 import com.solicitudes.services.ISolicitudService;
 import com.solicitudes.services.ITokenService;
 
 import io.micrometer.core.annotation.Timed;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @CrossOrigin(origins = "*")
+@Api(value = "Microservicio de Solicitudes")
 public class SolicitudController {
 
 	@Autowired
@@ -39,9 +44,11 @@ public class SolicitudController {
 	ITokenService tokenService;
 
 	@Timed("get.solicitudes")
+	@ApiOperation(value = "Retorna las solicitudes asignadas a un usuario revisor", response = List.class)
 	@GetMapping(value = "/solicitud/{idUsuarioRevisor}")
 	public SolicitudResponse obtenerSolicitudPorIdUsuarioRevisor(
-			@PathVariable("idUsuarioRevisor") String idUsuarioRevisor, @RequestHeader("Authorization") String auth)
+			@ApiParam(value = "Identificador del usuario revisor a consultar", required = true) @PathVariable("idUsuarioRevisor") String idUsuarioRevisor,
+			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
 			throws Exception {
 		SolicitudResponse response = new SolicitudResponse();
 		try {
@@ -69,9 +76,12 @@ public class SolicitudController {
 	}
 
 	@Timed("post.solicitudes")
+	@ApiOperation(value = "Crea las solicitudes", response = Boolean.class)
 	@PostMapping(value = "/solicitud")
-	public SolicitudResponse crearSolicitud(@RequestBody SolicitudRequest request,
-			@RequestHeader("Authorization") String auth) throws Exception {
+	public SolicitudResponse crearSolicitud(
+			@ApiParam(value = "Objeto json para crear la solicitud", required = true) @RequestBody SolicitudRequest request,
+			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
+			throws Exception {
 
 		SolicitudResponse response = new SolicitudResponse();
 		Solicitud entidadSolicitud = new Solicitud();
@@ -121,9 +131,13 @@ public class SolicitudController {
 	}
 
 	@Timed("put.solicitudes")
+	@ApiOperation(value = "Actualiza una solicitud dado su id", response = Boolean.class)
 	@PutMapping(value = "/solicitud/{id}")
-	public SolicitudResponse actualizarSolicitud(@RequestBody Solicitud solicitud, @PathVariable("id") int id,
-			@RequestHeader("Authorization") String auth) throws Exception {
+	public SolicitudResponse actualizarSolicitud(
+			@ApiParam(value = "Objeto json para actualizar la solicitud", required = true) @RequestBody Solicitud solicitud,
+			@ApiParam(value = "Identificador de la solicitud a actualizar", required = true) @PathVariable("id") int id,
+			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
+			throws Exception {
 		SolicitudResponse response = new SolicitudResponse();
 		try {
 			if (auth != null && auth.startsWith("Bearer")) {
@@ -146,9 +160,12 @@ public class SolicitudController {
 	}
 
 	@Timed("get.documentos")
+	@ApiOperation(value = "Devuelve una objeto documento dado su id", response = Documento.class)
 	@GetMapping(value = "/solicitud/adjuntos/{idDocumentoAdjunto}")
-	public SolicitudResponse obtenerDocumentosAdjuntos(@PathVariable("idDocumentoAdjunto") String idDocumentoAdjunto,
-			@RequestHeader("Authorization") String auth) throws Exception {
+	public SolicitudResponse obtenerDocumentosAdjuntos(
+			@ApiParam(value = "Identificador del documento adjunto a consultar", required = true) @PathVariable("idDocumentoAdjunto") String idDocumentoAdjunto,
+			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
+			throws Exception {
 		SolicitudResponse response = new SolicitudResponse();
 
 		try {
