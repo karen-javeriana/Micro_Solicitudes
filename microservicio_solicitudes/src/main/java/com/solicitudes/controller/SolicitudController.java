@@ -61,7 +61,7 @@ public class SolicitudController {
 					response.setListSolicitudes(listSolicitud);
 				}
 			} else {
-				throw new ValidacionDatosException("Ocurrio un error validando la sesion");
+				throw new ValidacionDatosException("Ocurrio un error validando el token de la sesion");
 			}
 
 		} catch (
