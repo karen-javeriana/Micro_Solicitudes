@@ -28,7 +28,7 @@ public class TokenServiceImpl implements ITokenService {
 			}
 			if(e instanceof SignatureVerificationException) {
 				throw GeneralException.throwException(this, e,
-						"la firma del token no es válida");
+						"la firma del token es invalida");
 			}
 		}
 		return false;
