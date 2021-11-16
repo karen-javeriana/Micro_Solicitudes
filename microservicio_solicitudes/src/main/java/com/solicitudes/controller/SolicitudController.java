@@ -195,6 +195,7 @@ public class SolicitudController {
 		return response;
 	}
 
+	@SuppressWarnings("null")
 	@Timed("get.documentos")
 	@ApiOperation(value = "Devuelve una objeto documento dado su id", response = Documento.class)
 	@GetMapping(value = "/solicitud/adjuntos/{idDocumentoAdjunto}")
@@ -210,7 +211,7 @@ public class SolicitudController {
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
 					Documento documento = mongoService.getDocumentoPorId(idDocumentoAdjunto);
-					if (documento != null || !documento.getId().isEmpty()) {
+					if (documento != null && !documento.getId().isEmpty()) {
 						response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null, documento),
 								HttpStatus.OK);
 					} else {
