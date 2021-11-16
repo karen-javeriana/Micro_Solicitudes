@@ -62,7 +62,7 @@ public class MongoServiceImpl implements IMongoService {
 		try {
 			documento = documentoDao.findById(id);
 
-			if (documento == null) {
+			if (documento.isEmpty()) {
 				throw GeneralException.throwException(this, new Exception(), "No hay documentos asociados al id", "VD01");
 			}
 
