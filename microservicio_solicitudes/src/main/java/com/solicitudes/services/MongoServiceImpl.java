@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.excepciones.GeneralException;
-import com.excepciones.ValidacionDatosException;
 import com.mongodb.MongoExecutionTimeoutException;
 import com.mongodb.MongoSecurityException;
 import com.solicitudes.dao.IDocumentoDao;
@@ -20,26 +19,25 @@ public class MongoServiceImpl implements IMongoService {
 
 	@Override
 	public String crearDocumento(String cedula, String historiaClinica, String nombreCliente) throws Exception {
+		Documento documento = new Documento();
 		try {
-			Documento documento = new Documento();
+
 			documento.setCedula(cedula);
 			documento.setHistoriaClinica(historiaClinica);
 			documento.setNombreCliente(nombreCliente);
 			documentoDao.save(documento);
 
-			if (documento.getId() == null || documento.getId().isEmpty()) {
-				throw new ValidacionDatosException("Ocurrio un error almacenando los documentos en la fuente de datos");
-			}
-			return documento.getId();
 		} catch (Exception ex) {
 			if (ex instanceof MongoSecurityException) {
-				throw GeneralException.throwException(this, ex, "Error de autenciación con la base de datos Mongo");
+				throw GeneralException.throwException(this, ex, "Error de autenciación con la base de datos Mongo",
+						"BD01");
 			} else if (ex instanceof MongoExecutionTimeoutException) {
 				throw GeneralException.throwException(this, ex,
-						"Error estableciendo la comunicación con la base de datos");
+						"Error estableciendo la comunicación con la base de datos", "BD01");
 			}
 			throw GeneralException.throwException(this, ex);
 		}
+		return documento.getId();
 	}
 
 	@Override
@@ -48,10 +46,11 @@ public class MongoServiceImpl implements IMongoService {
 			documentoDao.deleteById(id);
 		} catch (Exception ex) {
 			if (ex instanceof MongoSecurityException) {
-				throw GeneralException.throwException(this, ex, "Error de autenciación con la base de datos Mongo");
+				throw GeneralException.throwException(this, ex, "Error de autenciación con la base de datos Mongo",
+						"BD01");
 			} else if (ex instanceof MongoExecutionTimeoutException) {
 				throw GeneralException.throwException(this, ex,
-						"Error estableciendo la comunicación con la base de datos");
+						"Error estableciendo la comunicación con la base de datos", "BD01");
 			}
 			throw GeneralException.throwException(this, ex);
 		}
@@ -63,16 +62,17 @@ public class MongoServiceImpl implements IMongoService {
 		try {
 			documento = documentoDao.findById(id);
 
-			if (documento == null) {
-				throw new ValidacionDatosException("No hay documentos asociados al id");
+			if (documento == null || documento.isEmpty()) {
+				throw GeneralException.throwException(this, new Exception(), "No hay documentos asociados al id", "VD01");
 			}
 
 		} catch (Exception ex) {
 			if (ex instanceof MongoSecurityException) {
-				throw GeneralException.throwException(this, ex, "Error de autenciación con la base de datos Mongo");
+				throw GeneralException.throwException(this, ex, "Error de autenciación con la base de datos Mongo",
+						"BD01");
 			} else if (ex instanceof MongoExecutionTimeoutException) {
 				throw GeneralException.throwException(this, ex,
-						"Error estableciendo la comunicación con la base de datos");
+						"Error estableciendo la comunicación con la base de datos", "BD01");
 			}
 			throw GeneralException.throwException(this, ex);
 		}

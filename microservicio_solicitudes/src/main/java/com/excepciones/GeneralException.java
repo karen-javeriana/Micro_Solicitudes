@@ -14,12 +14,13 @@ public class GeneralException extends Exception {
 		this.camposError = camposError;
 	}
 
-	public static Exception throwException(Object classE, Exception ex, String description) {
-		if (ex instanceof GeneralException) {
+	public static Exception throwException(Object classE, Exception ex, String description, String codeError) {
+		if (ex != null && ex instanceof GeneralException) {
 			return ex;
 		}
 
 		ErrorDto infoError = new ErrorDto();
+		infoError.setCodeError(codeError);
 		infoError.setDescripcionError(description);
 
 		return new GeneralException(infoError, ex.getCause());

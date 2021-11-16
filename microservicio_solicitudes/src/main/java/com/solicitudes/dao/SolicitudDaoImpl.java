@@ -7,12 +7,11 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import com.excepciones.BaseDatosException;
 import com.excepciones.GeneralException;
-import com.excepciones.ValidacionDatosException;
 import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import com.solicitudes.dto.UsuarioDto;
 import com.solicitudes.model.Solicitud;
@@ -32,14 +31,14 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			if (solicitudes.size() > 0) {
 				return solicitudes;
 			} else {
-				throw new ValidacionDatosException("No existe un Revisor asociado al id");
+				throw GeneralException.throwException(this, new Exception(), "No existe un Revisor asociado al id",
+						"VD01");
 			}
 		} catch (Exception ex) {
-
-			if (ex.getCause() instanceof CommunicationsException) {
-
-				throw GeneralException.throwException(this, ex,
-						"Error estableciendo comunicación con la base de datos");
+			if (ex.getCause() instanceof CommunicationsException
+					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
+				throw GeneralException.throwException(this, ex, "Error estableciendo comunicación con la base de datos",
+						"BD01");
 			}
 			throw GeneralException.throwException(this, ex);
 		}
@@ -56,7 +55,7 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			parameters.put("descripcion", solicitud.getDescripcion());
 			parameters.put("idDocumentosAdjuntos", solicitud.getIdDocumentosAdjuntos());
 			parameters.put("fechaSolicitud", new Date());
-			parameters.put("idUsuarioRevisor",solicitud.getIdUsuarioRevisor());
+			parameters.put("idUsuarioRevisor", solicitud.getIdUsuarioRevisor());
 			parameters.put("fechaRevision", null);
 			parameters.put("nombresCliente", solicitud.getNombresCliente());
 			parameters.put("apellidosCliente", solicitud.getApellidosCliente());
@@ -73,14 +72,11 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			parameters.put("genero", solicitud.getGenero());
 
 			id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-
-			if (id == 0) {
-				throw new BaseDatosException("Error creando la solicitud");
-			}
 		} catch (Exception ex) {
-			if (ex instanceof DataAccessResourceFailureException) {
-				throw GeneralException.throwException(this, ex,
-						"Error estableciendo comunicación con la base de datos");
+			if (ex instanceof DataAccessResourceFailureException || ex.getCause() instanceof CommunicationsException
+					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
+				throw GeneralException.throwException(this, ex, "Error estableciendo comunicación con la base de datos",
+						"BD01");
 			}
 			throw GeneralException.throwException(this, ex);
 		}
@@ -93,11 +89,11 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			String updateQuery = "update Solicitud set fechaRevision = ? , estado = ? where idSolicitud = ?";
 			jdbcTemplate.update(updateQuery, new Date(), estado, id);
 		} catch (Exception ex) {
-			if (ex.getCause() instanceof CommunicationsException) {
-				throw GeneralException.throwException(this, ex,
-						"Error estableciendo comunicación con la base de datos");
+			if (ex.getCause() instanceof CommunicationsException || ex.getCause() instanceof CommunicationsException
+					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
+				throw GeneralException.throwException(this, ex, "Error estableciendo comunicación con la base de datos",
+						"BD01");
 			}
-			throw new BaseDatosException("Error actualizando la solicitud");
 		}
 	}
 
@@ -128,12 +124,12 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 				}
 			}
 		} catch (Exception ex) {
-			if (ex.getCause() instanceof CommunicationsException) {
+			if (ex.getCause() instanceof CommunicationsException || ex.getCause() instanceof CommunicationsException
+					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
 
-				throw GeneralException.throwException(this, ex,
-						"Error estableciendo comunicación con la base de datos");
+				throw GeneralException.throwException(this, ex, "Error estableciendo comunicación con la base de datos",
+						"BD01");
 			}
-			throw new BaseDatosException("Error consultando la capacidad de los revisores");
 		}
 		return mapResult;
 	}
@@ -143,11 +139,11 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			String updateQuery = "update Solicitud set  estado = ?, idUsuarioRevisor = ? where idSolicitud = ?";
 			jdbcTemplate.update(updateQuery, estado, idRevisor, idSolicitud);
 		} catch (Exception ex) {
-			if (ex.getCause() instanceof CommunicationsException) {
-				throw GeneralException.throwException(this, ex,
-						"Error estableciendo comunicación con la base de datos");
+			if (ex.getCause() instanceof CommunicationsException || ex.getCause() instanceof CommunicationsException
+					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
+				throw GeneralException.throwException(this, ex, "Error estableciendo comunicación con la base de datos",
+						"BD01");
 			}
-			throw new BaseDatosException("Error actualizando la solicitud");
 		}
 	}
 

@@ -20,10 +20,26 @@ public class SolicitudResponse {
 	@XmlElement(name = "listSolicitudes", required = false)
 	private List<SolicitudRequest> listSolicitudes;
 
+	public SolicitudResponse(SolicitudRequest solicitud, String error, Boolean sucess,
+			List<SolicitudRequest> listSolicitudes, Documento documento) {
+		super();
+		this.solicitud = solicitud;
+		this.error = error;
+		this.sucess = sucess;
+		this.listSolicitudes = listSolicitudes;
+		this.documento = documento;
+	}
+
 	private Documento documento;
 
 	public SolicitudResponse() {
 		super();
+	}
+
+	public SolicitudResponse(String error, Boolean sucess) {
+		super();
+		this.error = error;
+		this.sucess = sucess;
 	}
 
 	public SolicitudRequest getSolicitud() {

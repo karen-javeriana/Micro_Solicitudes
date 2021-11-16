@@ -8,7 +8,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import com.excepciones.GeneralException;
-import com.excepciones.ValidacionDatosException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -57,7 +56,7 @@ public class SolicitudServiceImpl implements ISolicitudService {
 
 		try {
 			if (token == null) {
-				throw new ValidacionDatosException("El token es invalido");
+				token = this.autenticar();
 			} else {
 				String solicitudJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(solicitud);
 				// Se inserta en la cola
@@ -105,7 +104,7 @@ public class SolicitudServiceImpl implements ISolicitudService {
 							json.get("country").asText()));
 				}
 			} else {
-				throw new ValidacionDatosException("No existen usuarios revisores");
+				throw GeneralException.throwException(this, null, "No existen usuarios revisores", "VD01");
 			}
 		} catch (Exception e) {
 			throw GeneralException.throwException(this, e);
