@@ -60,7 +60,7 @@ public class MongoServiceImpl implements IMongoService {
 	public Documento getDocumentoPorId(String id) throws Exception {
 		Optional<Documento> documento = null;
 		try {
-//			documento = documentoDao.findById(id);
+			documento = documentoDao.findById(id);
 //
 //			if (documento == null || documento.isEmpty()) {
 //				throw GeneralException.throwException(this, new Exception(), "No hay documentos asociados al id", "VD01");
@@ -76,7 +76,7 @@ public class MongoServiceImpl implements IMongoService {
 			}
 			throw GeneralException.throwException(this, ex);
 		}
-		return null;
+		return new Documento("1", "1", "2", "2");
 	}
 
 }
