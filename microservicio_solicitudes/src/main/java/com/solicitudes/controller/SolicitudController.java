@@ -211,7 +211,7 @@ public class SolicitudController {
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
 					Documento documento = mongoService.getDocumentoPorId(idDocumentoAdjunto);
-					if (documento != null && !documento.getId().isEmpty()) {
+					if (documento != null && documento.getId() != null) {
 						response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null, documento),
 								HttpStatus.OK);
 					} else {

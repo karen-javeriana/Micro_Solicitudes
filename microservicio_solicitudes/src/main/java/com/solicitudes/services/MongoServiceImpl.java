@@ -76,17 +76,10 @@ public class MongoServiceImpl implements IMongoService {
 			List<Documento> documentos = mongoTemplate.find(query, Documento.class);
 			if (documentos != null && documentos.size() > 0) {
 				documento = documentos.get(0);
+			} else {
+				throw GeneralException.throwException(this, new Exception(), "No hay documentos asociados al id",
+						"VD01");
 			}
-//			Optional<Documento> documentoOptional = documentoDao.findById(id);
-//
-//			if (documentoOptional == null || documentoOptional.isEmpty()) {
-//				throw GeneralException.throwException(this, new Exception(), "No hay documentos asociados al id",
-//						"VD01");
-//			} else {
-//				documento.setId(documentoOptional.get().getId());
-//				documento.setCedula(documentoOptional.get().getCedula());
-//			}
-
 		} catch (Exception ex) {
 			if (ex instanceof MongoSecurityException) {
 				throw GeneralException.throwException(this, ex, "Error de autenciación con la base de datos Mongo",
