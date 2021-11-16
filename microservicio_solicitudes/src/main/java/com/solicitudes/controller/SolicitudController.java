@@ -197,7 +197,7 @@ public class SolicitudController {
 
 	@Timed("get.documentos")
 	@ApiOperation(value = "Devuelve una objeto documento dado su id", response = Documento.class)
-	@GetMapping(value = "/documento/{idDocumentoAdjunto}")
+	@GetMapping(value = "/solicitud/adjuntos/{idDocumentoAdjunto}")
 	public ResponseEntity<SolicitudResponse> obtenerDocumentosAdjuntos(
 			@ApiParam(value = "Identificador del documento adjunto a consultar", required = true) @PathVariable("idDocumentoAdjunto") String idDocumentoAdjunto,
 			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
@@ -209,14 +209,14 @@ public class SolicitudController {
 				String[] partsToken = auth.split(" ");
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
-//					Documento documento = mongoService.getDocumentoPorId(idDocumentoAdjunto);
+					Documento documento = mongoService.getDocumentoPorId(idDocumentoAdjunto);
 //					if (documento != null || !documento.getId().isEmpty()) {
 //						response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null, documento),
 //								HttpStatus.OK);
 //					} else {
-//						response = new ResponseEntity<>(
-//								new SolicitudResponse("No hay documentos asociados al id", false), HttpStatus.OK);
-//					}
+						response = new ResponseEntity<>(
+								new SolicitudResponse("No hay documentos asociados al id", false), HttpStatus.OK);
+					//}
 				}
 			} else {
 				response = new ResponseEntity<>(new SolicitudResponse("Ocurrio un error validando la sesion", false),
