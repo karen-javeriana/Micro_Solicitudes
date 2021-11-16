@@ -58,12 +58,16 @@ public class MongoServiceImpl implements IMongoService {
 
 	@Override
 	public Documento getDocumentoPorId(String id) throws Exception {
-		Optional<Documento> documento = null;
+		Documento documento = new Documento();
 		try {
-			documento = documentoDao.findById(id);
+			Optional<Documento> documentoOptional = documentoDao.findById(id);
 
-			if (documento.isEmpty()) {
+			if (documentoOptional == null || documentoOptional.isEmpty()) {
 				throw GeneralException.throwException(this, new Exception(), "No hay documentos asociados al id", "VD01");
+			}
+			else {
+				documento.setId(documentoOptional.get().getId());
+				documento.setCedula(documentoOptional.get().getCedula());
 			}
 
 		} catch (Exception ex) {
@@ -76,7 +80,7 @@ public class MongoServiceImpl implements IMongoService {
 			}
 			throw GeneralException.throwException(this, ex);
 		}
-		return documento.get();
+		return documento;
 	}
 
 }
