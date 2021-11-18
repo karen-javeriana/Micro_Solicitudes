@@ -21,7 +21,9 @@ public class SwaggerConfig {
 	}
 
 	private ApiInfo getSolicitudesApiInfo() {
-		return new ApiInfoBuilder().title("Solicitudes Api").version("1.0").build();
+		return new ApiInfoBuilder().title("Solicitudes Api")
+				.description("Microservicio de solicitudes y documentos")
+				.version("1.0").build();
 	}
 
 }

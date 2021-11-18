@@ -16,9 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.solicitudes.dto.ErrorDto;
 import com.solicitudes.dto.SolicitudRequest;
 import com.solicitudes.dto.SolicitudResponse;
-import com.solicitudes.model.Documento;
 import com.solicitudes.model.Solicitud;
-import com.solicitudes.services.IMongoService;
 import com.solicitudes.services.ISolicitudService;
 import com.solicitudes.services.ITokenService;
 
@@ -29,14 +27,11 @@ import io.swagger.annotations.ApiParam;
 
 @RestController
 @CrossOrigin(origins = "*")
-@Api(value = "Microservicio de Solicitudes")
+@Api(value = "Api de Solicitudes")
 public class SolicitudController {
 
 	@Autowired
 	ISolicitudService solicitudService;
-
-	@Autowired
-	IMongoService mongoService;
 
 	@Autowired
 	RestTemplate template;
@@ -59,7 +54,7 @@ public class SolicitudController {
 				if (isTokenValid) {
 					List<SolicitudRequest> listSolicitud = solicitudService
 							.obtenerSolicitudPorIdUsuarioRevisor(idUsuarioRevisor);
-					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, listSolicitud, null),
+					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, listSolicitud),
 							HttpStatus.OK);
 				}
 			} else {
@@ -97,7 +92,6 @@ public class SolicitudController {
 
 		ResponseEntity<SolicitudResponse> response = null;
 		Solicitud entidadSolicitud = new Solicitud();
-		String idDocumento = null;
 		try {
 			if (auth != null && auth.startsWith("Bearer")) {
 				String[] partsToken = auth.split(" ");
@@ -118,14 +112,8 @@ public class SolicitudController {
 					entidadSolicitud.setIdCliente(request.getIdCliente());
 					entidadSolicitud.setDireccion(request.getDireccion());
 					entidadSolicitud.setGenero(request.getGenero());
-
-					idDocumento = mongoService.crearDocumento(request.getCedulaAdjunta(),
-							request.getHistoriaClinicaAdjunta(),
-							entidadSolicitud.getNombresCliente() + " " + entidadSolicitud.getApellidosCliente());
-
-					entidadSolicitud.setIdDocumentosAdjuntos(idDocumento);
 					solicitudService.crearSolicitud(entidadSolicitud, partsToken[1]);
-					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null, null), HttpStatus.OK);
+					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null), HttpStatus.OK);
 				}
 			} else {
 				response = new ResponseEntity<>(new SolicitudResponse("Ocurrio un error validando la sesion", false),
@@ -147,9 +135,6 @@ public class SolicitudController {
 				status = HttpStatus.BAD_REQUEST;
 			}
 			response = new ResponseEntity<>(new SolicitudResponse(error.getDescripcionError(), false), status);
-			if (idDocumento != null) {
-				mongoService.deleteDocumento(idDocumento);
-			}
 		}
 		return response;
 	}
@@ -169,55 +154,7 @@ public class SolicitudController {
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
 					solicitudService.actualizarSolicitud(solicitud, id);
-					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null, null), HttpStatus.OK);
-				}
-			} else {
-				response = new ResponseEntity<>(new SolicitudResponse("Ocurrio un error validando la sesion", false),
-						HttpStatus.UNAUTHORIZED);
-			}
-
-		} catch (Exception e) {
-			ErrorDto error = solicitudService.setMessageExceptionRequest(e);
-			HttpStatus status = null;
-
-			if (error.getCodeError().equals("VD01")) {
-				status = HttpStatus.OK;
-			} else if (error.getCodeError().equals("AUT01")) {
-				status = HttpStatus.UNAUTHORIZED;
-
-			} else if (error.getCodeError().equals("BD01")) {
-				status = HttpStatus.REQUEST_TIMEOUT;
-			} else {
-				status = HttpStatus.BAD_REQUEST;
-			}
-			response = new ResponseEntity<>(new SolicitudResponse(error.getDescripcionError(), false), status);
-		}
-		return response;
-	}
-
-	@SuppressWarnings("null")
-	@Timed("get.documentos")
-	@ApiOperation(value = "Devuelve una objeto documento dado su id", response = Documento.class)
-	@GetMapping(value = "/solicitud/adjuntos/{idDocumentoAdjunto}")
-	public ResponseEntity<SolicitudResponse> obtenerDocumentosAdjuntos(
-			@ApiParam(value = "Identificador del documento adjunto a consultar", required = true) @PathVariable("idDocumentoAdjunto") String idDocumentoAdjunto,
-			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
-			throws Exception {
-		ResponseEntity<SolicitudResponse> response = null;
-
-		try {
-			if (auth != null && auth.startsWith("Bearer")) {
-				String[] partsToken = auth.split(" ");
-				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
-				if (isTokenValid) {
-					Documento documento = mongoService.getDocumentoPorId(idDocumentoAdjunto);
-					if (documento != null && documento.getId() != null) {
-						response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null, documento),
-								HttpStatus.OK);
-					} else {
-						response = new ResponseEntity<>(
-								new SolicitudResponse("No hay documentos asociados al id", false), HttpStatus.OK);
-					}
+					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null), HttpStatus.OK);
 				}
 			} else {
 				response = new ResponseEntity<>(new SolicitudResponse("Ocurrio un error validando la sesion", false),

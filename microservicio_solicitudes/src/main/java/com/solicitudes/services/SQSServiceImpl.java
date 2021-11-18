@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import com.excepciones.GeneralException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solicitudes.dao.ISolicitudDao;
+import com.solicitudes.dto.DocumentoRequest;
 import com.solicitudes.dto.UsuarioDto;
+import com.solicitudes.model.Documento;
 import com.solicitudes.model.Solicitud;
 
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
@@ -24,10 +26,15 @@ public class SQSServiceImpl implements ISQSService {
 	ISolicitudService iSolicitudService;
 
 	@Autowired
+	IDocumentoService iDocumentoService;
+
+	@Autowired
 	ISolicitudDao iSolicitudDao;
 
 	@Value("${cloud.aws.sqs.endpoint}")
-	private String urlSqs;
+	private String urlSqsSolicitudes;
+
+	private final String urlSqsDocumentos = "https://sqs.us-east-2.amazonaws.com/505040459445/Queue-documentos";
 
 	private final QueueMessagingTemplate queueMessagingTemplate;
 
@@ -40,7 +47,17 @@ public class SQSServiceImpl implements ISQSService {
 	public void pushSqsSolicitud(String mensaje, String token) throws Exception {
 		try {
 			this.token = token;
-			queueMessagingTemplate.send(urlSqs, MessageBuilder.withPayload(mensaje).build());
+			queueMessagingTemplate.send(urlSqsSolicitudes, MessageBuilder.withPayload(mensaje).build());
+
+		} catch (Exception e) {
+			throw GeneralException.throwException(this, e);
+		}
+	}
+
+	public void pushSqsDocumento(String mensaje, String token) throws Exception {
+		try {
+			this.token = token;
+			queueMessagingTemplate.send(urlSqsDocumentos, MessageBuilder.withPayload(mensaje).build());
 
 		} catch (Exception e) {
 			throw GeneralException.throwException(this, e);
@@ -52,32 +69,45 @@ public class SQSServiceImpl implements ISQSService {
 		String idRevisorAsignar = "";
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
-			// Se obtiene los usuarios con rol--> revisor para asignar las solicitudes
-			List<UsuarioDto> usuariosRevisores = iSolicitudService.obtenerUsuariosRevisores(token);
 
-			Map<String, Integer> mapAsignacionPorRevisor = iSolicitudDao.countSolicitudesAsignadasPorRevisor(usuariosRevisores);
-
-			int cargaAsignacionTmp = 0;
-			if (mapAsignacionPorRevisor.isEmpty()) {
-				if (!usuariosRevisores.isEmpty()) {
-					idRevisorAsignar= usuariosRevisores.get(0).getIdUsuario();
-				}
-
-			} else {
-				for (String map : mapAsignacionPorRevisor.keySet()) {
-
-					if (cargaAsignacionTmp == 0 || cargaAsignacionTmp >= mapAsignacionPorRevisor.get(map)) {
-						cargaAsignacionTmp = mapAsignacionPorRevisor.get(map);
-						idRevisorAsignar = map;
-					}
-				}
-			}
 			Solicitud solicitud = objectMapper.readValue(mensaje, Solicitud.class);
 
-			solicitud.setEstado("ASIGNADA");
-			solicitud.setIdUsuarioRevisor(idRevisorAsignar);
+			// Se obtiene los documentos asociados a la solicitud
+			Documento documentoAdjunto = iDocumentoService.getDocumentoPorCriterios(solicitud.getTipoIdentificacion(),
+					solicitud.getNumeroIdentificacion(), solicitud.getEmail());
 			
-			long idSolicitud = iSolicitudDao.crearSolicitud(solicitud);
+			if (documentoAdjunto != null) {
+
+				// Se obtiene los usuarios con rol--> revisor para asignar las solicitudes
+				List<UsuarioDto> usuariosRevisores = iSolicitudService.obtenerUsuariosRevisores(token);
+
+				Map<String, Integer> mapAsignacionPorRevisor = iSolicitudDao
+						.countSolicitudesAsignadasPorRevisor(usuariosRevisores);
+
+				int cargaAsignacionTmp = 0;
+				if (mapAsignacionPorRevisor.isEmpty()) {
+					if (!usuariosRevisores.isEmpty()) {
+						idRevisorAsignar = usuariosRevisores.get(0).getIdUsuario();
+					}
+
+				} else {
+					for (String map : mapAsignacionPorRevisor.keySet()) {
+
+						if (cargaAsignacionTmp == 0 || cargaAsignacionTmp >= mapAsignacionPorRevisor.get(map)) {
+							cargaAsignacionTmp = mapAsignacionPorRevisor.get(map);
+							idRevisorAsignar = map;
+						}
+					}
+				}
+
+				solicitud.setIdDocumentosAdjuntos(documentoAdjunto.getId());
+				solicitud.setEstado("ASIGNADA");
+				solicitud.setIdUsuarioRevisor(idRevisorAsignar);
+
+				long idSolicitud = iSolicitudDao.crearSolicitud(solicitud);
+			} else {
+				// Se debe enviar correo con notificacion solicitud fallida
+			}
 
 		} catch (Exception e) {
 			pushSqsSolicitud(mensaje, token);
@@ -85,4 +115,24 @@ public class SQSServiceImpl implements ISQSService {
 		}
 	}
 
+	@SqsListener("Queue-documentos")
+	void receiveSqsDocumento(String mensaje) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			DocumentoRequest documento = objectMapper.readValue(mensaje, DocumentoRequest.class);
+
+			// Se valida la cedula con el servicio de aws recognition
+			boolean isDocumentValid = iDocumentoService.validarDocumento(documento.getCedula(), token);
+
+			if (isDocumentValid) {
+				String idDocumentoMongo = iDocumentoService.crearDocumento(documento.getCedula(),
+						documento.getHistoriaClinica(), documento.getEmail(), documento.getTipoIdentificacion(),
+						documento.getNumeroIdentificacion());
+			}
+
+		} catch (Exception e) {
+			pushSqsDocumento(mensaje, token);
+			throw GeneralException.throwException(this, e);
+		}
+	}
 }

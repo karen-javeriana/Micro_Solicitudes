@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import com.solicitudes.model.Documento;
-
 public class SolicitudResponse {
 
 	@XmlElement(name = "solicitud", required = false)
@@ -21,16 +19,13 @@ public class SolicitudResponse {
 	private List<SolicitudRequest> listSolicitudes;
 
 	public SolicitudResponse(SolicitudRequest solicitud, String error, Boolean sucess,
-			List<SolicitudRequest> listSolicitudes, Documento documento) {
+			List<SolicitudRequest> listSolicitudes) {
 		super();
 		this.solicitud = solicitud;
 		this.error = error;
 		this.sucess = sucess;
 		this.listSolicitudes = listSolicitudes;
-		this.documento = documento;
 	}
-
-	private Documento documento;
 
 	public SolicitudResponse() {
 		super();
@@ -56,14 +51,6 @@ public class SolicitudResponse {
 
 	public void setListSolicitudes(List<SolicitudRequest> listSolicitudes) {
 		this.listSolicitudes = listSolicitudes;
-	}
-
-	public Documento getDocumento() {
-		return documento;
-	}
-
-	public void setDocumento(Documento documento) {
-		this.documento = documento;
 	}
 
 	public String getError() {
