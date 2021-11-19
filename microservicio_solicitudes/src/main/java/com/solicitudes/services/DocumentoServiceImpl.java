@@ -9,7 +9,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.NotFound;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpServerErrorException.BadGateway;
 import org.springframework.web.client.RestTemplate;
 
@@ -41,14 +40,13 @@ public class DocumentoServiceImpl implements IDocumentoService {
 	}
 
 	@Override
-	public String crearDocumento(String cedula, String historiaClinica, String email, String tipoDoc, String numeroDoc)
+	public String crearDocumento(String cedula, String historiaClinica, String email, String idGenerado)
 			throws Exception {
 		Documento documento = new Documento();
 		try {
 			documento.setCedula(cedula);
 			documento.setHistoriaClinica(historiaClinica);
-			documento.setNumeroDoc(numeroDoc);
-			documento.setTipoDoc(tipoDoc);
+			documento.setId(idGenerado);
 			documento.setEmail(email);
 			documentoDao.save(documento);
 
@@ -108,14 +106,11 @@ public class DocumentoServiceImpl implements IDocumentoService {
 	}
 
 	@Override
-	public Documento getDocumentoPorCriterios(String tipoIdentificacion, String numeroIdentificacion, String email)
-			throws Exception {
+	public Documento getDocumentoPorIdGenerado(String idGenerado) throws Exception {
 		Documento documento = new Documento();
 		try {
 			Query query = new Query();
-			query.addCriteria(Criteria.where("tipoDoc").is(tipoIdentificacion));
-			query.addCriteria(Criteria.where("numeroDoc").is(numeroIdentificacion));
-			query.addCriteria(Criteria.where("email").is(email));
+			query.addCriteria(Criteria.where("id").is(idGenerado));
 
 			List<Documento> documentos = mongoTemplate.find(query, Documento.class);
 			if (documentos != null && documentos.size() > 0) {

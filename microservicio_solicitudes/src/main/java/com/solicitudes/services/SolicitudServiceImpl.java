@@ -69,10 +69,10 @@ public class SolicitudServiceImpl implements ISolicitudService {
 
 	}
 
-	public void actualizarSolicitud(Solicitud solicitud, int id) throws Exception {
+	public void actualizarSolicitud(Solicitud solicitud, String id, String estado) throws Exception {
 
 		try {
-			iSolicitudDao.actualizarSolicitud(solicitud, id, "RESUELTA");
+			iSolicitudDao.actualizarSolicitud(solicitud, id, estado);
 		} catch (Exception e) {
 			throw GeneralException.throwException(this, e);
 		}
@@ -130,7 +130,7 @@ public class SolicitudServiceImpl implements ISolicitudService {
 	private SolicitudRequest convertToEntity(Solicitud solicitudEntity) throws Exception {
 		SolicitudRequest request = new SolicitudRequest();
 		try {
-			request.setIdSolicitud(solicitudEntity.getIdSolicitud());
+			request.setId(solicitudEntity.getId());
 			request.setIdProducto(solicitudEntity.getIdProducto());
 			request.setEstado(solicitudEntity.getEstado());
 			request.setDescripcion(solicitudEntity.getDescripcion());
@@ -174,5 +174,17 @@ public class SolicitudServiceImpl implements ISolicitudService {
 			throw GeneralException.throwException(this, e);
 		}
 		return token;
+	}
+
+	public Solicitud obtenerSolicitudPorId(String id) throws Exception {
+		Solicitud result = null;
+		try {
+			result = iSolicitudDao.obtenerSolicitudPorId(id);
+
+		} catch (Exception e) {
+
+			throw GeneralException.throwException(this, e);
+		}
+		return result;
 	}
 }

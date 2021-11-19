@@ -5,8 +5,7 @@ import com.solicitudes.model.Documento;
 
 public interface IDocumentoService {
 
-	String crearDocumento(String cedula, String historiaClinica, String email, String tipoDoc, String numeroDoc)
-			throws Exception;
+	String crearDocumento(String cedula, String historiaClinica, String email, String idGenerado) throws Exception;
 
 	void deleteDocumento(String id) throws Exception;
 
@@ -16,7 +15,6 @@ public interface IDocumentoService {
 
 	boolean validarDocumento(String cedula, String token) throws Exception;
 
-	Documento getDocumentoPorCriterios(String tipoIdentificacion, String numeroIdentificacion, String email)
-			throws Exception;
+	Documento getDocumentoPorIdGenerado(String idGenerado) throws Exception;
 
 }

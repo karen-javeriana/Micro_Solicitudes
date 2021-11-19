@@ -19,8 +19,7 @@ public class Solicitud implements Serializable {
 	private static final long serialVersionUID = -2164967490469491766L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int idSolicitud;
+	private String id;
 
 	private String idProducto;
 
@@ -73,14 +72,6 @@ public class Solicitud implements Serializable {
 	}
 
 	public Solicitud() {
-	}
-
-	public int getIdSolicitud() {
-		return idSolicitud;
-	}
-
-	public void setIdSolicitud(int idSolicitud) {
-		this.idSolicitud = idSolicitud;
 	}
 
 	public String getNombresCliente() {
@@ -233,6 +224,14 @@ public class Solicitud implements Serializable {
 
 	public void setPais(String pais) {
 		this.pais = pais;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

@@ -12,11 +12,8 @@ public class Documento {
 	@Id
 	private String id;
 
-	@Field(name = "tipoDoc")
-	private String tipoDoc;
-
-	@Field(name = "numeroDoc")
-	private String numeroDoc;
+	@Field(name = "id")
+	private String idGenerado;
 
 	@Field(name = "email")
 	private String email;
@@ -32,11 +29,10 @@ public class Documento {
 	}
 
 	@PersistenceConstructor
-	public Documento(String id, String tipoDoc, String numeroDoc, String email, String cedula, String historiaClinica) {
+	public Documento(String id, String idGenerado, String email, String cedula, String historiaClinica) {
 		super();
 		this.id = id;
-		this.tipoDoc = tipoDoc;
-		this.numeroDoc = numeroDoc;
+		this.idGenerado = idGenerado;
 		this.email = email;
 		this.cedula = cedula;
 		this.historiaClinica = historiaClinica;
@@ -50,20 +46,12 @@ public class Documento {
 		this.id = id;
 	}
 
-	public String getTipoDoc() {
-		return tipoDoc;
+	public String getIdGenerado() {
+		return idGenerado;
 	}
 
-	public void setTipoDoc(String tipoDoc) {
-		this.tipoDoc = tipoDoc;
-	}
-
-	public String getNumeroDoc() {
-		return numeroDoc;
-	}
-
-	public void setNumeroDoc(String numeroDoc) {
-		this.numeroDoc = numeroDoc;
+	public void setIdGenerado(String idGenerado) {
+		this.idGenerado = idGenerado;
 	}
 
 	public String getEmail() {

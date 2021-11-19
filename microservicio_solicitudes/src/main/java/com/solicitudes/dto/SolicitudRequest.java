@@ -3,7 +3,7 @@ package com.solicitudes.dto;
 import java.util.Date;
 
 public class SolicitudRequest {
-	private int idSolicitud;
+	private String id;
 	private String idProducto;
 	private String estado;
 	private String descripcion;
@@ -31,13 +31,13 @@ public class SolicitudRequest {
 		super();
 	}
 
-	public SolicitudRequest(int idSolicitud, String idProducto, String estado, String descripcion, Date fechaSolicitud,
+	public SolicitudRequest(String id, String idProducto, String estado, String descripcion, Date fechaSolicitud,
 			Date fechaRevision, String idDocumentosAdjuntos, String idUsuarioRevisor, String nombresCliente,
 			String apellidosCliente, String numeroIdentificacion, String tipoIdentificacion, String email,
 			String cedulaAdjunta, String historiaClinicaAdjunta, String foto, String telefono, String fechaNacimiento,
 			String ciudad, String pais, String direccion, String genero, String idCliente) {
 		super();
-		this.idSolicitud = idSolicitud;
+		this.id = id;
 		this.idProducto = idProducto;
 		this.estado = estado;
 		this.descripcion = descripcion;
@@ -116,14 +116,6 @@ public class SolicitudRequest {
 
 	public void setGenero(String genero) {
 		this.genero = genero;
-	}
-
-	public int getIdSolicitud() {
-		return idSolicitud;
-	}
-
-	public void setIdSolicitud(int idSolicitud) {
-		this.idSolicitud = idSolicitud;
 	}
 
 	public String getIdProducto() {
@@ -244,6 +236,14 @@ public class SolicitudRequest {
 
 	public void setHistoriaClinicaAdjunta(String historiaClinicaAdjunta) {
 		this.historiaClinicaAdjunta = historiaClinicaAdjunta;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 }

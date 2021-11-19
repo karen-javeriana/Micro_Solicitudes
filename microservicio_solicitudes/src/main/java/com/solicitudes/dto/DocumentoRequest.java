@@ -1,13 +1,12 @@
 package com.solicitudes.dto;
 
 public class DocumentoRequest {
+
+	private String id;
+	
 	private String cedula;
 
 	private String historiaClinica;
-
-	private String tipoIdentificacion;
-
-	private String numeroIdentificacion;
 
 	private String email;
 
@@ -31,20 +30,12 @@ public class DocumentoRequest {
 		this.historiaClinica = historiaClinica;
 	}
 
-	public String getTipoIdentificacion() {
-		return tipoIdentificacion;
+	public String getId() {
+		return id;
 	}
 
-	public void setTipoIdentificacion(String tipoIdentificacion) {
-		this.tipoIdentificacion = tipoIdentificacion;
-	}
-
-	public String getNumeroIdentificacion() {
-		return numeroIdentificacion;
-	}
-
-	public void setNumeroIdentificacion(String numeroIdentificacion) {
-		this.numeroIdentificacion = numeroIdentificacion;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	public String getEmail() {
@@ -55,13 +46,11 @@ public class DocumentoRequest {
 		this.email = email;
 	}
 
-	public DocumentoRequest(String cedula, String historiaClinica, String tipoIdentificacion, String numeroIdentificacion,
-			String email) {
+	public DocumentoRequest(String cedula, String historiaClinica, String id, String email) {
 		super();
 		this.cedula = cedula;
 		this.historiaClinica = historiaClinica;
-		this.tipoIdentificacion = tipoIdentificacion;
-		this.numeroIdentificacion = numeroIdentificacion;
+		this.id = id;
 		this.email = email;
 	}
 

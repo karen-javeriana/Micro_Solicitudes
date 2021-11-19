@@ -10,11 +10,13 @@ public interface ISolicitudDao {
 
 	List<Solicitud> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor) throws Exception;
 
-	Long crearSolicitud(Solicitud solicitud) throws Exception;
+	void crearSolicitud(Solicitud solicitud) throws Exception;
 
-	void actualizarSolicitud(Solicitud solicitud, int idSolicitud, String estado) throws Exception;
+	void actualizarSolicitud(Solicitud solicitud, String idSolicitud, String estado) throws Exception;
 
 	Map<String, Integer> countSolicitudesAsignadasPorRevisor(List<UsuarioDto> listUsuarios) throws Exception;
 
-	void actualizarSolicitudAsignada(int idSolicitud, String estado, String idRevisor) throws Exception;
+	void actualizarSolicitudAsignada(String idSolicitud, String estado, String idRevisor) throws Exception;
+	
+	Solicitud obtenerSolicitudPorId(String id) throws Exception;
 }

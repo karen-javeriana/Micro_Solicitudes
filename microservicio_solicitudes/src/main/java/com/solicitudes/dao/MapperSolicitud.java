@@ -13,7 +13,7 @@ public class MapperSolicitud implements RowMapper<Solicitud> {
 	public Solicitud mapRow(ResultSet rs, int rowNum) throws SQLException {
 		Solicitud solicitud = new Solicitud();
 		try {
-			solicitud.setIdSolicitud(rs.getInt("idSolicitud"));
+			solicitud.setId(rs.getString("id"));
 			solicitud.setIdProducto(rs.getString("idProducto"));
 			solicitud.setEstado(rs.getString("estado"));
 			solicitud.setDescripcion(rs.getString("descripcion"));

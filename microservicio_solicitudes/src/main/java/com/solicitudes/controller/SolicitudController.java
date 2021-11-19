@@ -98,6 +98,7 @@ public class SolicitudController {
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
 					entidadSolicitud.setIdProducto(request.getIdProducto());
+					entidadSolicitud.setId(request.getId());
 					entidadSolicitud.setDescripcion(request.getDescripcion());
 					entidadSolicitud.setNombresCliente(request.getNombresCliente());
 					entidadSolicitud.setApellidosCliente(request.getApellidosCliente());
@@ -144,7 +145,7 @@ public class SolicitudController {
 	@PutMapping(value = "/solicitud/{id}")
 	public ResponseEntity<SolicitudResponse> actualizarSolicitud(
 			@ApiParam(value = "Objeto json para actualizar la solicitud", required = true) @RequestBody Solicitud solicitud,
-			@ApiParam(value = "Identificador de la solicitud a actualizar", required = true) @PathVariable("id") int id,
+			@ApiParam(value = "Identificador de la solicitud a actualizar", required = true) @PathVariable("id") String id,
 			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
 			throws Exception {
 		ResponseEntity<SolicitudResponse> response = null;
@@ -153,7 +154,7 @@ public class SolicitudController {
 				String[] partsToken = auth.split(" ");
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
-					solicitudService.actualizarSolicitud(solicitud, id);
+					solicitudService.actualizarSolicitud(solicitud, id, "RESUELTA");
 					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null), HttpStatus.OK);
 				}
 			} else {

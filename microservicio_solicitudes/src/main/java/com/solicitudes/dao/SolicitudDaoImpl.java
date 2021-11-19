@@ -44,12 +44,13 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 		}
 	}
 
-	public Long crearSolicitud(Solicitud solicitud) throws Exception {
+	public void crearSolicitud(Solicitud solicitud) throws Exception {
 		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
-				.withTableName("Solicitud").usingGeneratedKeyColumns("idSolicitud");
+				.withTableName("Solicitud");
 		long id = 0;
 		try {
 			Map<String, Object> parameters = new HashMap<>();
+			parameters.put("id", solicitud.getId());
 			parameters.put("idProducto", solicitud.getIdProducto());
 			parameters.put("estado", solicitud.getEstado() == null ? "SIN ASIGNAR" : solicitud.getEstado());
 			parameters.put("descripcion", solicitud.getDescripcion());
@@ -71,7 +72,7 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			parameters.put("direccion", solicitud.getDireccion());
 			parameters.put("genero", solicitud.getGenero());
 
-			id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
+			simpleJdbcInsert.execute(parameters);
 		} catch (Exception ex) {
 			if (ex instanceof DataAccessResourceFailureException || ex.getCause() instanceof CommunicationsException
 					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
@@ -80,14 +81,12 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			}
 			throw GeneralException.throwException(this, ex);
 		}
-		return id;
-
 	}
 
-	public void actualizarSolicitud(Solicitud solicitud, int id, String estado) throws Exception {
+	public void actualizarSolicitud(Solicitud solicitud, String id, String estado) throws Exception {
 		try {
-			String updateQuery = "update Solicitud set fechaRevision = ? , estado = ? where idSolicitud = ?";
-			jdbcTemplate.update(updateQuery, new Date(), estado, id);
+			String updateQuery = "update Solicitud set fechaRevision = ? , estado = ? , idDocumentosAdjuntos = ? where id = ?";
+			jdbcTemplate.update(updateQuery, new Date(), estado, solicitud.getIdDocumentosAdjuntos(), id);
 		} catch (Exception ex) {
 			if (ex.getCause() instanceof CommunicationsException || ex.getCause() instanceof CommunicationsException
 					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
@@ -108,9 +107,9 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			}
 
 			String ids = idUsuariosConsulta.substring(0, idUsuariosConsulta.length() - 1);
-			List<Solicitud> listSolicitudes = jdbcTemplate.query(String
-					.format("SELECT * FROM Solicitud WHERE idUsuarioRevisor IN (%s) and estado <> 'RESUELTA'", ids),
-					new MapperSolicitud());
+			List<Solicitud> listSolicitudes = jdbcTemplate.query(String.format(
+					"SELECT * FROM Solicitud WHERE idUsuarioRevisor IN (%s) and estado <> 'RESUELTA' and estado <> 'RECHAZADA'",
+					ids), new MapperSolicitud());
 
 			int contador = 0;
 			for (Solicitud solicitud : listSolicitudes) {
@@ -134,9 +133,9 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 		return mapResult;
 	}
 
-	public void actualizarSolicitudAsignada(int idSolicitud, String estado, String idRevisor) throws Exception {
+	public void actualizarSolicitudAsignada(String idSolicitud, String estado, String idRevisor) throws Exception {
 		try {
-			String updateQuery = "update Solicitud set  estado = ?, idUsuarioRevisor = ? where idSolicitud = ?";
+			String updateQuery = "update Solicitud set  estado = ?, idUsuarioRevisor = ? where id = ?";
 			jdbcTemplate.update(updateQuery, estado, idRevisor, idSolicitud);
 		} catch (Exception ex) {
 			if (ex.getCause() instanceof CommunicationsException || ex.getCause() instanceof CommunicationsException
@@ -144,6 +143,26 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 				throw GeneralException.throwException(this, ex, "Error estableciendo comunicación con la base de datos",
 						"BD01");
 			}
+		}
+	}
+
+	public Solicitud obtenerSolicitudPorId(String id) throws Exception {
+		try {
+			List<Solicitud> solicitudes = jdbcTemplate.query("select * from Solicitud WHERE id = ? ",
+					new MapperSolicitud(), id);
+
+			if (solicitudes != null && solicitudes.size() > 0) {
+				return solicitudes.get(0);
+			} else {
+				return null;
+			}
+		} catch (Exception ex) {
+			if (ex.getCause() instanceof CommunicationsException
+					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
+				throw GeneralException.throwException(this, ex, "Error estableciendo comunicación con la base de datos",
+						"BD01");
+			}
+			throw GeneralException.throwException(this, ex);
 		}
 	}
 

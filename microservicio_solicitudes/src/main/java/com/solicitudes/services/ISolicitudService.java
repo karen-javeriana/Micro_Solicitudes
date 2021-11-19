@@ -13,9 +13,11 @@ public interface ISolicitudService {
 
 	void crearSolicitud(Solicitud solicitud, String token) throws Exception;
 
-	void actualizarSolicitud(Solicitud solicitud, int id) throws Exception;
+	void actualizarSolicitud(Solicitud solicitud, String id, String estado) throws Exception;
 
 	List<UsuarioDto> obtenerUsuariosRevisores(String token) throws Exception;
+	
+	Solicitud obtenerSolicitudPorId(String id) throws Exception;
 
 	ErrorDto setMessageExceptionRequest(Exception ex);
 	
