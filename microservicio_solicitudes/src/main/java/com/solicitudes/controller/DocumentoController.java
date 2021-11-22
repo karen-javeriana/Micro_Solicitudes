@@ -104,7 +104,7 @@ public class DocumentoController {
 
 					String documentoJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
 					// Se inserta en la cola de documentos
-					iSqsService.pushSqsDocumentoFifo(documentoJson, auth);
+					iSqsService.pushSqsDocumentoFifo(documentoJson, partsToken[1]);
 
 					response = new ResponseEntity<>(new DocumentoResponse(null, null, null, null, true), HttpStatus.OK);
 				}

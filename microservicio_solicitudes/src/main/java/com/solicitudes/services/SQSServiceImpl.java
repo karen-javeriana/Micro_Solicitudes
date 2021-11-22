@@ -33,7 +33,7 @@ public class SQSServiceImpl implements ISQSService {
 	@Value("${cloud.aws.sqs.endpoint}")
 	private String urlSqsSolicitudes;
 
-	private final String urlSqsDocumentosFifo = "https://sqs.us-east-2.amazonaws.com/505040459445/Queue_documento.fifo";
+	private final String urlSqsDocumentosFifo = "https://sqs.us-east-2.amazonaws.com/505040459445/Queue_documentos.fifo";
 
 	private final QueueMessagingTemplate queueMessagingTemplate;
 
@@ -69,7 +69,7 @@ public class SQSServiceImpl implements ISQSService {
 		}
 	}
 
-	@SqsListener(value = "Queue_solicitud.fifo", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
+	@SqsListener(value = "Queue_solicitudes.fifo", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
 	void receiveSqsSolicitud(String mensaje) throws Exception {
 		String idRevisorAsignar = "";
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -102,7 +102,7 @@ public class SQSServiceImpl implements ISQSService {
 				}
 			}
 
-			solicitud.setEstado("ASIGNADA");
+			solicitud.setEstado("PENDIENTE");
 			solicitud.setIdUsuarioRevisor(idRevisorAsignar);
 
 			iSolicitudDao.crearSolicitud(solicitud);
@@ -112,7 +112,7 @@ public class SQSServiceImpl implements ISQSService {
 		}
 	}
 
-	@SqsListener(value = "Queue_documento.fifo", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
+	@SqsListener(value = "Queue_documentos.fifo", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
 	void receiveSqsDocumento(String mensaje) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
@@ -121,8 +121,10 @@ public class SQSServiceImpl implements ISQSService {
 			Solicitud solicitud = iSolicitudService.obtenerSolicitudPorId(documento.getId());
 
 			// Se valida la cedula con el servicio de aws recognition
-			String credenciales = iSolicitudService.autenticar();
-			boolean isDocumentValid = iDocumentoService.validarDocumento(documento.getCedula(), credenciales);
+			if (token == null) {
+				token = iSolicitudService.autenticar();
+			}
+			boolean isDocumentValid = iDocumentoService.validarDocumento(documento.getCedula(), token);
 
 			if (isDocumentValid) {
 				String idDocumentoMongo = iDocumentoService.crearDocumento(documento.getCedula(),
@@ -131,6 +133,7 @@ public class SQSServiceImpl implements ISQSService {
 				// Se actualiza el id Documento en la bd solicitud
 				if (solicitud != null) {
 					solicitud.setIdDocumentosAdjuntos(documento.getId());
+					solicitud.setEstado("ASIGNADA");
 					iSolicitudService.actualizarSolicitud(solicitud, documento.getId(), solicitud.getEstado());
 				} else {
 					// Se envia correo
