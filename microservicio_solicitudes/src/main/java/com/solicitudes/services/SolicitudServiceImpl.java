@@ -199,8 +199,7 @@ public class SolicitudServiceImpl implements ISolicitudService {
 			score = json.get("score").asDouble();
 
 		} catch (Exception e) {
-
-			throw GeneralException.throwException(this, e);
+			score = 0.0;
 		}
 		return score;
 	}

@@ -45,9 +45,12 @@ public class SQSServiceImpl implements ISQSService {
 
 	public void pushSqsSolicitud(String mensaje) throws Exception {
 		try {
+			ObjectMapper mapper = new ObjectMapper();
+			Solicitud solicitud = mapper.readValue(mensaje, Solicitud.class);
+
 			Map<String, Object> headers = new HashMap<>();
-			headers.put("message-group-id", "groupId1");
-			headers.put("message-deduplication-id", "dedupId1");
+			headers.put("message-group-id", "groupId" + solicitud.getId());
+			headers.put("message-deduplication-id", "dedupId" + solicitud.getId());
 			queueMessagingTemplate.convertAndSend(urlSqsSolicitudes, mensaje, headers);
 
 		} catch (Exception e) {
@@ -71,6 +74,7 @@ public class SQSServiceImpl implements ISQSService {
 	void receiveSqsSolicitud(String mensaje) throws Exception {
 		String idRevisorAsignar = "";
 		ObjectMapper objectMapper = new ObjectMapper();
+		boolean validacionSarflaft = false;
 		try {
 
 			Solicitud solicitud = objectMapper.readValue(mensaje, Solicitud.class);
@@ -98,10 +102,15 @@ public class SQSServiceImpl implements ISQSService {
 					}
 				}
 			}
+			Double resultado = 0.0;
+			try {
+				resultado = iSolicitudService.obtenerScoreSarlaft();
+				validacionSarflaft = true;
+			} catch (Exception e) {
+				validacionSarflaft = false;
+			}
 
-			Double resultado = iSolicitudService.obtenerScoreSarlaft();
-
-			if (resultado < 90.0) {
+			if (resultado < 90.0 || !validacionSarflaft) {
 				solicitud.setEstado("RECHAZADA");
 			} else {
 				solicitud.setEstado("PENDIENTE");
