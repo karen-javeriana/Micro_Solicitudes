@@ -23,7 +23,6 @@ import com.mongodb.MongoSecurityException;
 import com.solicitudes.dao.IDocumentoDao;
 import com.solicitudes.dto.DocumentoValidateRequest;
 import com.solicitudes.dto.ErrorDto;
-import com.solicitudes.dto.UpdateSolicitudRequest;
 import com.solicitudes.model.Documento;
 
 @Service
