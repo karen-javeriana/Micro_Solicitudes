@@ -161,8 +161,9 @@ public class DocumentoServiceImpl implements IDocumentoService {
 			headers.setContentType(MediaType.APPLICATION_JSON);
 
 			HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+			
 			String result = template.postForObject(url, entity, String.class);
-
+			
 			JsonNode resultNode = mapper.readTree(result);
 			JsonNode document = resultNode.get("document");
 			Double confidence = document.get("Confidence").asDouble();

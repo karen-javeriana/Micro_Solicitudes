@@ -30,11 +30,12 @@ public class SolicitudServiceImpl implements ISolicitudService {
 	@Autowired
 	ISQSService iSqsService;
 
-	public List<SolicitudRequest> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor) throws Exception {
+	public List<SolicitudRequest> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor, Integer page)
+			throws Exception {
 		List<SolicitudRequest> listSolicitudes = new ArrayList<SolicitudRequest>();
 
 		try {
-			List<Solicitud> result = iSolicitudDao.obtenerSolicitudPorIdUsuarioRevisor(idUsuarioRevisor);
+			List<Solicitud> result = iSolicitudDao.obtenerSolicitudPorIdUsuarioRevisor(idUsuarioRevisor, page);
 			if (listSolicitudes != null) {
 				for (Solicitud sol : result) {
 					SolicitudRequest solicitudRequest = new SolicitudRequest();
@@ -202,6 +203,16 @@ public class SolicitudServiceImpl implements ISolicitudService {
 			throw GeneralException.throwException(this, e);
 		}
 		return score;
+	}
+
+	public int obtenerPaginacionSolicitudes(String estadoSolicitud) throws Exception {
+		try {
+			return iSolicitudDao.obtenerPaginacionSolicitudes(estadoSolicitud);
+
+		} catch (Exception e) {
+
+			throw GeneralException.throwException(this, e);
+		}
 	}
 
 }

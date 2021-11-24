@@ -9,7 +9,7 @@ import com.solicitudes.model.Solicitud;
 
 public interface ISolicitudService {
 
-	List<SolicitudRequest> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor) throws Exception;
+	List<SolicitudRequest> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor, Integer page) throws Exception;
 
 	void crearSolicitud(Solicitud solicitud) throws Exception;
 
@@ -24,5 +24,7 @@ public interface ISolicitudService {
 	String autenticar() throws Exception;
 	
 	Double obtenerScoreSarlaft() throws Exception;
+	
+	int obtenerPaginacionSolicitudes(String estadoSolicitud) throws Exception;
 
 }

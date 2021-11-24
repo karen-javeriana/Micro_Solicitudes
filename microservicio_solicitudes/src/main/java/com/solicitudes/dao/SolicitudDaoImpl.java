@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.CommunicationException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
@@ -22,18 +24,25 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
-	public List<Solicitud> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor) throws Exception {
+	public List<Solicitud> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor, Integer page) throws Exception {
 		try {
-			List<Solicitud> solicitudes = jdbcTemplate.query(
-					"select * from Solicitud WHERE idUsuarioRevisor = ? and estado ='ASIGNADA' ", new MapperSolicitud(),
-					idUsuarioRevisor);
-
-			if (solicitudes.size() > 0) {
-				return solicitudes;
+			if (page == null || page == 0) {
+				throw GeneralException.throwException(this, new Exception(),
+						"Es obligatorio el parametro {page} para consultar un rango de solicitudes", "VD02");
 			} else {
-				throw GeneralException.throwException(this, new Exception(), "El revisor no tiene solicitudes asignadas",
-						"VD01");
+				
+				List<Solicitud> solicitudes = jdbcTemplate.query(
+						"select * from Solicitud WHERE idUsuarioRevisor =? and estado ='ASIGNADA' limit ?,10 ",
+						new MapperSolicitud(), idUsuarioRevisor, (page-1)*10);
+
+				if (solicitudes.size() > 0) {
+					return solicitudes;
+				} else {
+					throw GeneralException.throwException(this, new Exception(),
+							"El revisor no tiene solicitudes asignadas", "VD01");
+				}
 			}
+
 		} catch (Exception ex) {
 			if (ex.getCause() instanceof CommunicationsException
 					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
@@ -47,7 +56,6 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 	public void crearSolicitud(Solicitud solicitud) throws Exception {
 		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
 				.withTableName("Solicitud");
-		long id = 0;
 		try {
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put("id", solicitud.getId());
@@ -164,6 +172,34 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			}
 			throw GeneralException.throwException(this, ex);
 		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public int obtenerPaginacionSolicitudes(String estadoSolicitud) throws Exception {
+		double totalRows = 0;
+		int pages=0;
+		try {
+			if (estadoSolicitud != null) {
+				totalRows = jdbcTemplate.queryForObject("select count(*) from Solicitud  where estado = ?",
+						new Object[] { estadoSolicitud }, Double.class);
+				totalRows= totalRows/10;
+			} else {
+				totalRows = jdbcTemplate.queryForObject("select count(*) from Solicitud  where estado ='ASIGNADA'",
+						new Object[] { estadoSolicitud }, Double.class);
+				totalRows= totalRows/10;
+			}
+
+		} catch (Exception ex) {
+
+			if (ex.getCause() instanceof CommunicationException) {
+
+				throw GeneralException.throwException(this, ex, "Error estableciendo comunicación con la base de datos",
+						"AUT01");
+			}
+			throw GeneralException.throwException(this, ex);
+		}
+		pages = (int) Math.ceil((totalRows));
+		return pages;
 	}
 
 }

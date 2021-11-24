@@ -76,9 +76,8 @@ public class SQSServiceImpl implements ISQSService {
 			Solicitud solicitud = objectMapper.readValue(mensaje, Solicitud.class);
 
 			// Se obtiene los usuarios con rol--> revisor para asignar las solicitudes
-			if (token == null) {
-				token = iSolicitudService.autenticar();
-			}
+
+			String token = iSolicitudService.autenticar();
 			List<UsuarioDto> usuariosRevisores = iSolicitudService.obtenerUsuariosRevisores(token);
 
 			Map<String, Integer> mapAsignacionPorRevisor = iSolicitudDao

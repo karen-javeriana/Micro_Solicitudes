@@ -8,6 +8,9 @@ public class SolicitudResponse {
 
 	@XmlElement(name = "solicitud", required = false)
 	private SolicitudRequest solicitud;
+	
+	@XmlElement(name = "pages", required = false)
+	private Integer pages;
 
 	@XmlElement(name = "error", required = false)
 	private String error;
@@ -19,6 +22,17 @@ public class SolicitudResponse {
 	private List<SolicitudRequest> listSolicitudes;
 
 	public SolicitudResponse(SolicitudRequest solicitud, String error, Boolean sucess,
+			List<SolicitudRequest> listSolicitudes, Integer pages) {
+		super();
+		this.solicitud = solicitud;
+		this.error = error;
+		this.sucess = sucess;
+		this.listSolicitudes = listSolicitudes;
+		this.pages=pages;
+	}
+	
+
+	public SolicitudResponse(SolicitudRequest solicitud, String error, Boolean sucess,
 			List<SolicitudRequest> listSolicitudes) {
 		super();
 		this.solicitud = solicitud;
@@ -26,6 +40,7 @@ public class SolicitudResponse {
 		this.sucess = sucess;
 		this.listSolicitudes = listSolicitudes;
 	}
+
 
 	public SolicitudResponse() {
 		super();
@@ -69,4 +84,15 @@ public class SolicitudResponse {
 		this.sucess = sucess;
 	}
 
+
+	public Integer getPages() {
+		return pages;
+	}
+
+
+	public void setPages(Integer pages) {
+		this.pages = pages;
+	}
+
+	
 }

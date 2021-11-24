@@ -5,10 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +43,7 @@ public class DocumentoController {
 	@ApiOperation(value = "Devuelve un objeto documento dado su id", response = Documento.class)
 	@GetMapping(value = "/documento/{idDocumentoAdjunto}")
 	public ResponseEntity<DocumentoResponse> obtenerDocumentosAdjuntos(
-			@ApiParam(value = "Identificador del documento adjunto a consultar", required = true) @PathVariable("idDocumentoAdjunto") String idDocumentoAdjunto,
+			@ApiParam(value = "Identificador del documento adjunto a consultar") @RequestParam(value = "idDocumentoAdjunto", required = false) String idDocumentoAdjunto,
 			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
 			throws Exception {
 		ResponseEntity<DocumentoResponse> response = null;
@@ -97,11 +97,17 @@ public class DocumentoController {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 
-			String documentoJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
-			// Se inserta en la cola de documentos
-			iSqsService.pushSqsDocumentoFifo(documentoJson);
+			if (request.getId() != null) {
+				String documentoJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
+				// Se inserta en la cola de documentos
+				iSqsService.pushSqsDocumentoFifo(documentoJson);
+				response = new ResponseEntity<>(new DocumentoResponse(null, null, null, null, true), HttpStatus.OK);
+			} else {
+				response = new ResponseEntity<>(
+						new DocumentoResponse("El campo {id} es obligatorio para procesar los documentos", false),
+						HttpStatus.BAD_REQUEST);
 
-			response = new ResponseEntity<>(new DocumentoResponse(null, null, null, null, true), HttpStatus.OK);
+			}
 
 		} catch (Exception e) {
 			ErrorDto error = documentoService.setMessageExceptionRequest(e);

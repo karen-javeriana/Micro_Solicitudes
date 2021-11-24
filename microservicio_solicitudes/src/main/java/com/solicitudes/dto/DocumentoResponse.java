@@ -13,7 +13,7 @@ public class DocumentoResponse {
 
 	@XmlElement(name = "Confidence", required = false)
 	private Double confidence;
-
+	
 	@XmlElement(name = "error", required = false)
 	private String error;
 

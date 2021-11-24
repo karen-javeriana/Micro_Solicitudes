@@ -8,7 +8,7 @@ import com.solicitudes.model.Solicitud;
 
 public interface ISolicitudDao {
 
-	List<Solicitud> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor) throws Exception;
+	List<Solicitud> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor, Integer page) throws Exception;
 
 	void crearSolicitud(Solicitud solicitud) throws Exception;
 
@@ -19,4 +19,6 @@ public interface ISolicitudDao {
 	void actualizarSolicitudAsignada(String idSolicitud, String estado, String idRevisor) throws Exception;
 	
 	Solicitud obtenerSolicitudPorId(String id) throws Exception;
+	
+	int obtenerPaginacionSolicitudes(String estadoSolicitud) throws Exception;
 }
