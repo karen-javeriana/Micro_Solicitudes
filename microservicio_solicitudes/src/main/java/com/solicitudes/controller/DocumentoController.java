@@ -41,7 +41,7 @@ public class DocumentoController {
 
 	@Timed("get.documentos")
 	@ApiOperation(value = "Devuelve un objeto documento dado su id", response = Documento.class)
-	@GetMapping(value = "/documento/{idDocumentoAdjunto}")
+	@GetMapping(value = "/documento")
 	public ResponseEntity<DocumentoResponse> obtenerDocumentosAdjuntos(
 			@ApiParam(value = "Identificador del documento adjunto a consultar") @RequestParam(value = "idDocumentoAdjunto", required = false) String idDocumentoAdjunto,
 			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
@@ -53,14 +53,20 @@ public class DocumentoController {
 				String[] partsToken = auth.split(" ");
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
-					Documento documento = documentoService.getDocumentoPorId(idDocumentoAdjunto);
-					if (documento != null && documento.getId() != null) {
-						response = new ResponseEntity<>(new DocumentoResponse(documento, null, null, null, true),
-								HttpStatus.OK);
-					} else {
+					if (idDocumentoAdjunto == null) {
 						response = new ResponseEntity<>(
-								new DocumentoResponse("No hay documentos asociados al id", false), HttpStatus.OK);
+								new DocumentoResponse("El parametro {idDocumentoAdjunto} es obligatorio", false), HttpStatus.BAD_REQUEST);
+					} else {
+						Documento documento = documentoService.getDocumentoPorId(idDocumentoAdjunto);
+						if (documento != null && documento.getId() != null) {
+							response = new ResponseEntity<>(new DocumentoResponse(documento, null, null, null, true),
+									HttpStatus.OK);
+						} else {
+							response = new ResponseEntity<>(
+									new DocumentoResponse("No hay documentos asociados al id", false), HttpStatus.OK);
+						}
 					}
+
 				}
 			} else {
 				response = new ResponseEntity<>(new DocumentoResponse("Ocurrio un error validando la sesion", false),

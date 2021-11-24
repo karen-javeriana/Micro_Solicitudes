@@ -45,7 +45,7 @@ public class SolicitudController {
 	@GetMapping(value = "/solicitud")
 	public ResponseEntity<SolicitudResponse> obtenerSolicitudPorIdUsuarioRevisor(
 			@ApiParam(value = "Identificador del usuario revisor a consultar") @RequestParam(value = "idUsuarioRevisor", required = false) String idUsuarioRevisor,
-			@ApiParam(value = "Número de la pagina seleccionada") @RequestParam(value = "page" ,required = false) Integer page,
+			@ApiParam(value = "Número de la pagina seleccionada") @RequestParam(value = "page", required = false) Integer page,
 			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
 			throws Exception {
 		ResponseEntity<SolicitudResponse> response = null;
@@ -126,8 +126,16 @@ public class SolicitudController {
 				entidadSolicitud.setIdCliente(request.getIdCliente());
 				entidadSolicitud.setDireccion(request.getDireccion());
 				entidadSolicitud.setGenero(request.getGenero());
-				solicitudService.crearSolicitud(entidadSolicitud);
-				response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null), HttpStatus.OK);
+
+				Solicitud solicitud = solicitudService.obtenerSolicitudPorId(entidadSolicitud.getId());
+
+				if (solicitud == null) {
+					solicitudService.crearSolicitud(entidadSolicitud);
+					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null), HttpStatus.OK);
+				} else {
+					response = new ResponseEntity<>(
+							new SolicitudResponse("El id de la solicitud debe ser unico", false), HttpStatus.OK);
+				}
 			} else {
 				response = new ResponseEntity<>(
 						new SolicitudResponse("El campo {id} es obligatorio para la creación de la solicitud", false),

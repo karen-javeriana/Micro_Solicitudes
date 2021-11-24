@@ -6,11 +6,13 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.NotFound;
 import org.springframework.web.client.HttpServerErrorException.BadGateway;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.excepciones.GeneralException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,6 +23,7 @@ import com.mongodb.MongoSecurityException;
 import com.solicitudes.dao.IDocumentoDao;
 import com.solicitudes.dto.DocumentoValidateRequest;
 import com.solicitudes.dto.ErrorDto;
+import com.solicitudes.dto.UpdateSolicitudRequest;
 import com.solicitudes.model.Documento;
 
 @Service
@@ -161,9 +164,9 @@ public class DocumentoServiceImpl implements IDocumentoService {
 			headers.setContentType(MediaType.APPLICATION_JSON);
 
 			HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
-			
+
 			String result = template.postForObject(url, entity, String.class);
-			
+
 			JsonNode resultNode = mapper.readTree(result);
 			JsonNode document = resultNode.get("document");
 			Double confidence = document.get("Confidence").asDouble();
@@ -183,5 +186,4 @@ public class DocumentoServiceImpl implements IDocumentoService {
 		}
 		return isValid;
 	}
-
 }
