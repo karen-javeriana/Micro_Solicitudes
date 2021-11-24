@@ -34,6 +34,7 @@ public class MapperSolicitud implements RowMapper<Solicitud> {
 			solicitud.setDireccion(rs.getString("direccion"));
 			solicitud.setGenero(rs.getString("genero"));
 			solicitud.setIdCliente(rs.getString("idCliente"));
+			solicitud.setScoreSarlaft(rs.getDouble("scoreSarlaft"));
 
 		} catch (SQLException e) {
 			throw new SQLException(e.getMessage());

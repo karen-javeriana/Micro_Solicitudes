@@ -62,6 +62,8 @@ public class Solicitud implements Serializable {
 	private String direccion;
 
 	private String genero;
+	
+	private Double scoreSarlaft;
 
 	public String getEmail() {
 		return email;
@@ -234,4 +236,11 @@ public class Solicitud implements Serializable {
 		this.id = id;
 	}
 
+	public Double getScoreSarlaft() {
+		return scoreSarlaft;
+	}
+
+	public void setScoreSarlaft(Double scoreSarlaft) {
+		this.scoreSarlaft = scoreSarlaft;
+	}
 }

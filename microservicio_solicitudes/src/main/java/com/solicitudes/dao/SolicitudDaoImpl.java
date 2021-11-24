@@ -31,7 +31,7 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			if (solicitudes.size() > 0) {
 				return solicitudes;
 			} else {
-				throw GeneralException.throwException(this, new Exception(), "No existe un Revisor asociado al id",
+				throw GeneralException.throwException(this, new Exception(), "El revisor no tiene solicitudes asignadas",
 						"VD01");
 			}
 		} catch (Exception ex) {

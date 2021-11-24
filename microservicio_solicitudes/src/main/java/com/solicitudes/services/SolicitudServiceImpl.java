@@ -51,17 +51,14 @@ public class SolicitudServiceImpl implements ISolicitudService {
 		return listSolicitudes;
 	}
 
-	public void crearSolicitud(Solicitud solicitud, String token) throws Exception {
+	public void crearSolicitud(Solicitud solicitud) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
-			if (token == null) {
-				token = this.autenticar();
-			} else {
-				String solicitudJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(solicitud);
-				// Se inserta en la cola
-				iSqsService.pushSqsSolicitud(solicitudJson, token);
-			}
+
+			String solicitudJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(solicitud);
+			// Se inserta en la cola
+			iSqsService.pushSqsSolicitud(solicitudJson);
 
 		} catch (Exception e) {
 			throw GeneralException.throwException(this, e);
@@ -187,4 +184,24 @@ public class SolicitudServiceImpl implements ISolicitudService {
 		}
 		return result;
 	}
+
+	public Double obtenerScoreSarlaft() throws Exception {
+		Double score = null;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			String dir = "https://demo6443156.mockable.io/sarlaft";
+			String resultado = template.getForObject(dir, String.class);
+
+			JsonNode respuestaNode = mapper.readTree(resultado);
+			ObjectNode json = (ObjectNode) respuestaNode;
+
+			score = json.get("score").asDouble();
+
+		} catch (Exception e) {
+
+			throw GeneralException.throwException(this, e);
+		}
+		return score;
+	}
+
 }

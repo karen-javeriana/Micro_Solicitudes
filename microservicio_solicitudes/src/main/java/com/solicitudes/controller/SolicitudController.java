@@ -86,40 +86,31 @@ public class SolicitudController {
 	@ApiOperation(value = "Crea las solicitudes", response = Boolean.class)
 	@PostMapping(value = "/solicitud")
 	public ResponseEntity<SolicitudResponse> crearSolicitud(
-			@ApiParam(value = "Objeto json para crear la solicitud", required = true) @RequestBody SolicitudRequest request,
-			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
+			@ApiParam(value = "Objeto json para crear la solicitud", required = true) @RequestBody SolicitudRequest request)
 			throws Exception {
 
 		ResponseEntity<SolicitudResponse> response = null;
 		Solicitud entidadSolicitud = new Solicitud();
 		try {
-			if (auth != null && auth.startsWith("Bearer")) {
-				String[] partsToken = auth.split(" ");
-				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
-				if (isTokenValid) {
-					entidadSolicitud.setIdProducto(request.getIdProducto());
-					entidadSolicitud.setId(request.getId());
-					entidadSolicitud.setDescripcion(request.getDescripcion());
-					entidadSolicitud.setNombresCliente(request.getNombresCliente());
-					entidadSolicitud.setApellidosCliente(request.getApellidosCliente());
-					entidadSolicitud.setNumeroIdentificacion(request.getNumeroIdentificacion());
-					entidadSolicitud.setTipoIdentificacion(request.getTipoIdentificacion());
-					entidadSolicitud.setEmail(request.getEmail());
-					entidadSolicitud.setFoto(request.getFoto());
-					entidadSolicitud.setTelefono(request.getTelefono());
-					entidadSolicitud.setFechaNacimiento(request.getFechaNacimiento());
-					entidadSolicitud.setCiudad(request.getCiudad());
-					entidadSolicitud.setPais(request.getPais());
-					entidadSolicitud.setIdCliente(request.getIdCliente());
-					entidadSolicitud.setDireccion(request.getDireccion());
-					entidadSolicitud.setGenero(request.getGenero());
-					solicitudService.crearSolicitud(entidadSolicitud, partsToken[1]);
-					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null), HttpStatus.OK);
-				}
-			} else {
-				response = new ResponseEntity<>(new SolicitudResponse("Ocurrio un error validando la sesion", false),
-						HttpStatus.UNAUTHORIZED);
-			}
+
+			entidadSolicitud.setIdProducto(request.getIdProducto());
+			entidadSolicitud.setId(request.getId());
+			entidadSolicitud.setDescripcion(request.getDescripcion());
+			entidadSolicitud.setNombresCliente(request.getNombresCliente());
+			entidadSolicitud.setApellidosCliente(request.getApellidosCliente());
+			entidadSolicitud.setNumeroIdentificacion(request.getNumeroIdentificacion());
+			entidadSolicitud.setTipoIdentificacion(request.getTipoIdentificacion());
+			entidadSolicitud.setEmail(request.getEmail());
+			entidadSolicitud.setFoto(request.getFoto());
+			entidadSolicitud.setTelefono(request.getTelefono());
+			entidadSolicitud.setFechaNacimiento(request.getFechaNacimiento());
+			entidadSolicitud.setCiudad(request.getCiudad());
+			entidadSolicitud.setPais(request.getPais());
+			entidadSolicitud.setIdCliente(request.getIdCliente());
+			entidadSolicitud.setDireccion(request.getDireccion());
+			entidadSolicitud.setGenero(request.getGenero());
+			solicitudService.crearSolicitud(entidadSolicitud);
+			response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null), HttpStatus.OK);
 
 		} catch (Exception e) {
 			ErrorDto error = solicitudService.setMessageExceptionRequest(e);
@@ -154,7 +145,7 @@ public class SolicitudController {
 				String[] partsToken = auth.split(" ");
 				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
 				if (isTokenValid) {
-					solicitudService.actualizarSolicitud(solicitud, id, "RESUELTA");
+					solicitudService.actualizarSolicitud(solicitud, id, solicitud.getEstado());
 					response = new ResponseEntity<>(new SolicitudResponse(null, null, true, null), HttpStatus.OK);
 				}
 			} else {

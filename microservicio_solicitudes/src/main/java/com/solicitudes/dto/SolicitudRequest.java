@@ -26,6 +26,7 @@ public class SolicitudRequest {
 	private String direccion;
 	private String genero;
 	private String idCliente;
+	private Double scoreSarlaft;
 
 	public SolicitudRequest() {
 		super();
@@ -35,7 +36,7 @@ public class SolicitudRequest {
 			Date fechaRevision, String idDocumentosAdjuntos, String idUsuarioRevisor, String nombresCliente,
 			String apellidosCliente, String numeroIdentificacion, String tipoIdentificacion, String email,
 			String cedulaAdjunta, String historiaClinicaAdjunta, String foto, String telefono, String fechaNacimiento,
-			String ciudad, String pais, String direccion, String genero, String idCliente) {
+			String ciudad, String pais, String direccion, String genero, String idCliente, Double scoreSarlaft) {
 		super();
 		this.id = id;
 		this.idProducto = idProducto;
@@ -60,6 +61,7 @@ public class SolicitudRequest {
 		this.direccion = direccion;
 		this.genero = genero;
 		this.idCliente = idCliente;
+		this.scoreSarlaft=scoreSarlaft;
 	}
 
 	public String getFoto() {
@@ -244,6 +246,14 @@ public class SolicitudRequest {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public Double getScoreSarlaft() {
+		return scoreSarlaft;
+	}
+
+	public void setScoreSarlaft(Double scoreSarlaft) {
+		this.scoreSarlaft = scoreSarlaft;
 	}
 
 }

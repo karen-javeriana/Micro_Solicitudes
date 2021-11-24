@@ -90,28 +90,18 @@ public class DocumentoController {
 	@ApiOperation(value = "Crea y procesa los documentos adjuntos", response = Boolean.class)
 	@PostMapping(value = "/documento")
 	public ResponseEntity<DocumentoResponse> crearDocumento(
-			@ApiParam(value = "Objeto json para procesar los documentos", required = true) @RequestBody DocumentoRequest request,
-			@ApiParam(value = "Campo para validar la sesion (token)", required = true) @RequestHeader("Authorization") String auth)
+			@ApiParam(value = "Objeto json para procesar los documentos", required = true) @RequestBody DocumentoRequest request)
 			throws Exception {
 
 		ResponseEntity<DocumentoResponse> response = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			if (auth != null && auth.startsWith("Bearer")) {
-				String[] partsToken = auth.split(" ");
-				boolean isTokenValid = tokenService.isTokenValid(partsToken[1]);
-				if (isTokenValid) {
 
-					String documentoJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
-					// Se inserta en la cola de documentos
-					iSqsService.pushSqsDocumentoFifo(documentoJson, partsToken[1]);
+			String documentoJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
+			// Se inserta en la cola de documentos
+			iSqsService.pushSqsDocumentoFifo(documentoJson);
 
-					response = new ResponseEntity<>(new DocumentoResponse(null, null, null, null, true), HttpStatus.OK);
-				}
-			} else {
-				response = new ResponseEntity<>(new DocumentoResponse("Ocurrio un error validando la sesion", false),
-						HttpStatus.UNAUTHORIZED);
-			}
+			response = new ResponseEntity<>(new DocumentoResponse(null, null, null, null, true), HttpStatus.OK);
 
 		} catch (Exception e) {
 			ErrorDto error = documentoService.setMessageExceptionRequest(e);

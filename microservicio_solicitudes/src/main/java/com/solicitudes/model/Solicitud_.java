@@ -5,9 +5,10 @@ import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
-@Generated(value="Dali", date="2021-11-19T16:15:16.927-0500")
+@Generated(value="Dali", date="2021-11-23T18:20:35.963-0500")
 @StaticMetamodel(Solicitud.class)
 public class Solicitud_ {
+	public static volatile SingularAttribute<Solicitud, String> id;
 	public static volatile SingularAttribute<Solicitud, String> idProducto;
 	public static volatile SingularAttribute<Solicitud, String> estado;
 	public static volatile SingularAttribute<Solicitud, String> descripcion;
@@ -28,5 +29,5 @@ public class Solicitud_ {
 	public static volatile SingularAttribute<Solicitud, String> idCliente;
 	public static volatile SingularAttribute<Solicitud, String> direccion;
 	public static volatile SingularAttribute<Solicitud, String> genero;
-	public static volatile SingularAttribute<Solicitud, String> id;
+	public static volatile SingularAttribute<Solicitud, Double> scoreSarlaft;
 }

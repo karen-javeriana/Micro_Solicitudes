@@ -11,7 +11,7 @@ public interface ISolicitudService {
 
 	List<SolicitudRequest> obtenerSolicitudPorIdUsuarioRevisor(String idUsuarioRevisor) throws Exception;
 
-	void crearSolicitud(Solicitud solicitud, String token) throws Exception;
+	void crearSolicitud(Solicitud solicitud) throws Exception;
 
 	void actualizarSolicitud(Solicitud solicitud, String id, String estado) throws Exception;
 
@@ -22,5 +22,7 @@ public interface ISolicitudService {
 	ErrorDto setMessageExceptionRequest(Exception ex);
 	
 	String autenticar() throws Exception;
+	
+	Double obtenerScoreSarlaft() throws Exception;
 
 }

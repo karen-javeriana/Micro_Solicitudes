@@ -43,9 +43,8 @@ public class SQSServiceImpl implements ISQSService {
 		this.queueMessagingTemplate = queueMessagingTemplate;
 	}
 
-	public void pushSqsSolicitud(String mensaje, String token) throws Exception {
+	public void pushSqsSolicitud(String mensaje) throws Exception {
 		try {
-			this.token = token;
 			Map<String, Object> headers = new HashMap<>();
 			headers.put("message-group-id", "groupId1");
 			headers.put("message-deduplication-id", "dedupId1");
@@ -56,9 +55,8 @@ public class SQSServiceImpl implements ISQSService {
 		}
 	}
 
-	public void pushSqsDocumentoFifo(String mensaje, String token) throws Exception {
+	public void pushSqsDocumentoFifo(String mensaje) throws Exception {
 		try {
-			this.token = token;
 			Map<String, Object> headers = new HashMap<>();
 			headers.put("message-group-id", "groupId2");
 			headers.put("message-deduplication-id", "dedupId2");
@@ -102,9 +100,15 @@ public class SQSServiceImpl implements ISQSService {
 				}
 			}
 
-			solicitud.setEstado("PENDIENTE");
-			solicitud.setIdUsuarioRevisor(idRevisorAsignar);
+			Double resultado = iSolicitudService.obtenerScoreSarlaft();
 
+			if (resultado < 90.0) {
+				solicitud.setEstado("RECHAZADA");
+			} else {
+				solicitud.setEstado("PENDIENTE");
+				solicitud.setScoreSarlaft(resultado);
+				solicitud.setIdUsuarioRevisor(idRevisorAsignar);
+			}
 			iSolicitudDao.crearSolicitud(solicitud);
 
 		} catch (Exception e) {
@@ -121,28 +125,29 @@ public class SQSServiceImpl implements ISQSService {
 			Solicitud solicitud = iSolicitudService.obtenerSolicitudPorId(documento.getId());
 
 			// Se valida la cedula con el servicio de aws recognition
-			if (token == null) {
-				token = iSolicitudService.autenticar();
-			}
-			boolean isDocumentValid = iDocumentoService.validarDocumento(documento.getCedula(), token);
+			if (solicitud != null && !solicitud.getEstado().equals("RECHAZADA")) {
+				String token = iSolicitudService.autenticar();
 
-			if (isDocumentValid) {
-				String idDocumentoMongo = iDocumentoService.crearDocumento(documento.getCedula(),
-						documento.getHistoriaClinica(), documento.getEmail(), documento.getId());
+				boolean isDocumentValid = iDocumentoService.validarDocumento(documento.getCedula(), token);
 
-				// Se actualiza el id Documento en la bd solicitud
-				if (solicitud != null) {
+				if (isDocumentValid) {
+					String idDocumentoMongo = iDocumentoService.crearDocumento(documento.getCedula(),
+							documento.getHistoriaClinica(), documento.getEmail(), documento.getId());
+
+					// Se actualiza el id Documento en la bd solicitud
 					solicitud.setIdDocumentosAdjuntos(documento.getId());
 					solicitud.setEstado("ASIGNADA");
 					iSolicitudService.actualizarSolicitud(solicitud, documento.getId(), solicitud.getEstado());
 				} else {
-					// Se envia correo
+					// Se notifica al usuario y se cambia el estado a la solicitud creada
+					if (solicitud != null) {
+						iSolicitudService.actualizarSolicitud(solicitud, documento.getId(), "RECHAZADA");
+					}
 				}
-			} else {
-				// Se notifica al usuario y se cambia el estado a la solicitud creada
-				if (solicitud != null) {
-					iSolicitudService.actualizarSolicitud(solicitud, documento.getId(), "RECHAZADA");
-				}
+			}
+
+			else {
+				// Se envia correo, de rechazo
 			}
 
 		} catch (Exception e) {
