@@ -1,15 +1,19 @@
 package com.solicitudes.services;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import com.excepciones.GeneralException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.cj.jdbc.exceptions.MysqlDataTruncation;
 import com.solicitudes.dao.ISolicitudDao;
+import com.solicitudes.dto.CorreoGenericoDto;
 import com.solicitudes.dto.DocumentoRequest;
 import com.solicitudes.dto.UsuarioDto;
 import com.solicitudes.model.Solicitud;
@@ -33,11 +37,9 @@ public class SQSServiceImpl implements ISQSService {
 	@Value("${cloud.aws.sqs.endpoint}")
 	private String urlSqsSolicitudes;
 
-	private final String urlSqsDocumentosFifo = "https://sqs.us-east-2.amazonaws.com/505040459445/Queue_documentos.fifo";
+	private final String urlSqsDocumentos = "https://sqs.us-east-2.amazonaws.com/505040459445/Queue-documentos";
 
 	private final QueueMessagingTemplate queueMessagingTemplate;
-
-	String token;
 
 	public SQSServiceImpl(QueueMessagingTemplate queueMessagingTemplate) {
 		this.queueMessagingTemplate = queueMessagingTemplate;
@@ -58,23 +60,21 @@ public class SQSServiceImpl implements ISQSService {
 		}
 	}
 
-	public void pushSqsDocumentoFifo(String mensaje) throws Exception {
+	public void pushSqsDocumentos(String mensaje) throws Exception {
 		try {
-			Map<String, Object> headers = new HashMap<>();
-			headers.put("message-group-id", "groupId2");
-			headers.put("message-deduplication-id", "dedupId2");
-			queueMessagingTemplate.convertAndSend(urlSqsDocumentosFifo, mensaje, headers);
+			queueMessagingTemplate.send(urlSqsDocumentos, MessageBuilder.withPayload(mensaje).build());
 
 		} catch (Exception e) {
 			throw GeneralException.throwException(this, e);
 		}
 	}
 
-	@SqsListener(value = "Queue_solicitudes.fifo", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
+	@SqsListener(value = "Queue_solicitudes.fifo", deletionPolicy = SqsMessageDeletionPolicy.ALWAYS)
 	void receiveSqsSolicitud(String mensaje) throws Exception {
 		String idRevisorAsignar = "";
 		ObjectMapper objectMapper = new ObjectMapper();
 		boolean validacionSarflaft = false;
+		Double resultadoSarlaft = 0.0;
 		try {
 
 			Solicitud solicitud = objectMapper.readValue(mensaje, Solicitud.class);
@@ -102,31 +102,36 @@ public class SQSServiceImpl implements ISQSService {
 					}
 				}
 			}
-			Double resultado = 0.0;
+
 			try {
-				resultado = iSolicitudService.obtenerScoreSarlaft();
+				resultadoSarlaft = iSolicitudService.obtenerScoreSarlaft();
 				validacionSarflaft = true;
 			} catch (Exception e) {
 				validacionSarflaft = false;
 			}
 
-			if (resultado < 90.0 || !validacionSarflaft) {
+			if (resultadoSarlaft < 90.0 || !validacionSarflaft) {
 				solicitud.setEstado("RECHAZADA");
 			} else {
 				solicitud.setEstado("PENDIENTE");
-				solicitud.setScoreSarlaft(resultado);
+				solicitud.setScoreSarlaft(resultadoSarlaft);
 				solicitud.setIdUsuarioRevisor(idRevisorAsignar);
 			}
 			iSolicitudDao.crearSolicitud(solicitud);
 
 		} catch (Exception e) {
+			if ((!(e.getCause() instanceof SQLIntegrityConstraintViolationException))
+					|| !(e.getCause() instanceof MysqlDataTruncation)) {
+				pushSqsSolicitud(mensaje);
+			}
 			throw GeneralException.throwException(this, e);
 		}
 	}
 
-	@SqsListener(value = "Queue_documentos.fifo", deletionPolicy = SqsMessageDeletionPolicy.ON_SUCCESS)
+	@SqsListener(value = "Queue-documentos", deletionPolicy = SqsMessageDeletionPolicy.ALWAYS)
 	void receiveSqsDocumento(String mensaje) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
+
 		try {
 			DocumentoRequest documento = objectMapper.readValue(mensaje, DocumentoRequest.class);
 
@@ -140,25 +145,44 @@ public class SQSServiceImpl implements ISQSService {
 
 				if (isDocumentValid) {
 					String idDocumentoMongo = iDocumentoService.crearDocumento(documento.getCedula(),
-							documento.getHistoriaClinica(), documento.getEmail(), documento.getId());
+							documento.getHistoriaClinica(), documento.getEmail(), documento.getId(), "VALIDO");
 
 					// Se actualiza el id Documento en la bd solicitud
 					solicitud.setIdDocumentosAdjuntos(documento.getId());
 					solicitud.setEstado("ASIGNADA");
 					iSolicitudService.actualizarSolicitud(solicitud, documento.getId(), solicitud.getEstado());
+					
+					CorreoGenericoDto infoCorreo = new CorreoGenericoDto("Estimado Cliente",
+							"Su solicitud fue asignada correctamente, pronto uno de nuestros asesores se pondra en contacto",
+							"Notificación asignación solicitud", "generic", documento.getEmail(), "");
+					iSolicitudService.enviarCorreoNotificacion(infoCorreo);
+					
 				} else {
-					// Se notifica al usuario y se cambia el estado a la solicitud creada
+					iDocumentoService.crearDocumento(documento.getCedula(), documento.getHistoriaClinica(),
+							documento.getEmail(), documento.getId(), "INVALIDO");
+
+					// Se notifica al usuario y se cambia el estado a la solicitud RECHAZADA
 					if (solicitud != null) {
 						iSolicitudService.actualizarSolicitud(solicitud, documento.getId(), "RECHAZADA");
 					}
-				}
-			}
 
-			else {
+					// Envio correo de rechazo
+					CorreoGenericoDto infoCorreo = new CorreoGenericoDto("Estimado Cliente",
+							"Su solicitud ha sido rechazada, por favor verifique la información suministrada",
+							"Notificación solicitud rechazada", "generic", documento.getEmail(), "");
+					iSolicitudService.enviarCorreoNotificacion(infoCorreo);
+				}
+			} else {
 				// Se envia correo, de rechazo
+				CorreoGenericoDto infoCorreo = new CorreoGenericoDto("Estimado Cliente",
+						"Su solicitud ha sido rechazada, por favor verifique la información suministrada",
+						"Notificación solicitud rechazada", "generic", documento.getEmail(), "");
+				iSolicitudService.enviarCorreoNotificacion(infoCorreo);
+
 			}
 
 		} catch (Exception e) {
+			pushSqsDocumentos(mensaje);
 			throw GeneralException.throwException(this, e);
 		}
 	}

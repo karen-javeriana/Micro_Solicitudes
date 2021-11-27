@@ -5,7 +5,7 @@ import com.solicitudes.model.Documento;
 
 public interface IDocumentoService {
 
-	String crearDocumento(String cedula, String historiaClinica, String email, String idGenerado) throws Exception;
+	String crearDocumento(String cedula, String historiaClinica, String email, String idGenerado, String estado) throws Exception;
 
 	void deleteDocumento(String id) throws Exception;
 

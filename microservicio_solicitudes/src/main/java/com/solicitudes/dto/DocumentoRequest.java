@@ -9,6 +9,8 @@ public class DocumentoRequest {
 	private String historiaClinica;
 
 	private String email;
+	
+	private String estado;
 
 	public DocumentoRequest() {
 		super();
@@ -44,6 +46,14 @@ public class DocumentoRequest {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
 	}
 
 	public DocumentoRequest(String cedula, String historiaClinica, String id, String email) {

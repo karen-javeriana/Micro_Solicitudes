@@ -1,5 +1,6 @@
 package com.solicitudes.dao;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +31,10 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 				throw GeneralException.throwException(this, new Exception(),
 						"Es obligatorio el parametro {page} para consultar un rango de solicitudes", "VD02");
 			} else {
-				
+
 				List<Solicitud> solicitudes = jdbcTemplate.query(
 						"select * from Solicitud WHERE idUsuarioRevisor =? and estado ='ASIGNADA' limit ?,10 ",
-						new MapperSolicitud(), idUsuarioRevisor, (page-1)*10);
+						new MapperSolicitud(), idUsuarioRevisor, (page - 1) * 10);
 
 				if (solicitudes.size() > 0) {
 					return solicitudes;
@@ -79,6 +80,7 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 			parameters.put("idCliente", solicitud.getIdCliente());
 			parameters.put("direccion", solicitud.getDireccion());
 			parameters.put("genero", solicitud.getGenero());
+			parameters.put("scoreSarlaft", solicitud.getScoreSarlaft() == null ? 0.0 : solicitud.getScoreSarlaft());
 
 			simpleJdbcInsert.execute(parameters);
 		} catch (Exception ex) {
@@ -93,8 +95,14 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 
 	public void actualizarSolicitud(Solicitud solicitud, String id, String estado) throws Exception {
 		try {
-			String updateQuery = "update Solicitud set fechaRevision = ? , estado = ? , idDocumentosAdjuntos = ? where id = ?";
-			jdbcTemplate.update(updateQuery, new Date(), estado, solicitud.getIdDocumentosAdjuntos(), id);
+
+			if (solicitud.getIdDocumentosAdjuntos() != null) {
+				String updateQuery = "update Solicitud set fechaRevision = ? , estado = ? , idDocumentosAdjuntos = ? where id = ?";
+				jdbcTemplate.update(updateQuery, new Date(), estado, solicitud.getIdDocumentosAdjuntos(), id);
+			}else {
+				String updateQuery = "update Solicitud set fechaRevision = ? , estado = ? where id = ?";
+				jdbcTemplate.update(updateQuery, new Date(), estado, id);
+			}
 		} catch (Exception ex) {
 			if (ex.getCause() instanceof CommunicationsException || ex.getCause() instanceof CommunicationsException
 					|| ex.getCause() instanceof CannotGetJdbcConnectionException) {
@@ -177,16 +185,16 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 	@SuppressWarnings("deprecation")
 	public int obtenerPaginacionSolicitudes(String estadoSolicitud) throws Exception {
 		double totalRows = 0;
-		int pages=0;
+		int pages = 0;
 		try {
 			if (estadoSolicitud != null) {
 				totalRows = jdbcTemplate.queryForObject("select count(*) from Solicitud  where estado = ?",
 						new Object[] { estadoSolicitud }, Double.class);
-				totalRows= totalRows/10;
+				totalRows = totalRows / 10;
 			} else {
 				totalRows = jdbcTemplate.queryForObject("select count(*) from Solicitud  where estado ='ASIGNADA'",
 						new Object[] { estadoSolicitud }, Double.class);
-				totalRows= totalRows/10;
+				totalRows = totalRows / 10;
 			}
 
 		} catch (Exception ex) {

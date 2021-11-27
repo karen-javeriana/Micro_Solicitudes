@@ -4,5 +4,5 @@ public interface ISQSService {
 
 	void pushSqsSolicitud(String mensaje) throws Exception;
 	
-	void pushSqsDocumentoFifo(String mensaje) throws Exception;
+	void pushSqsDocumentos(String mensaje) throws Exception;
 }

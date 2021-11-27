@@ -23,6 +23,9 @@ public class Documento {
 
 	@Field(name = "historiaClinica")
 	private String historiaClinica;
+	
+	@Field(name = "estado")
+	private String estado;
 
 	public Documento() {
 		super();
@@ -76,6 +79,14 @@ public class Documento {
 
 	public void setHistoriaClinica(String historiaClinica) {
 		this.historiaClinica = historiaClinica;
+	}
+
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
 	}
 
 }

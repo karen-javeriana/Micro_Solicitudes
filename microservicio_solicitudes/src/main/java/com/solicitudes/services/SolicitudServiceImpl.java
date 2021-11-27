@@ -5,14 +5,19 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.excepciones.GeneralException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
 import com.solicitudes.dao.ISolicitudDao;
+import com.solicitudes.dto.CorreoGenericoDto;
 import com.solicitudes.dto.ErrorDto;
 import com.solicitudes.dto.SolicitudRequest;
 import com.solicitudes.dto.UsuarioDto;
@@ -149,6 +154,7 @@ public class SolicitudServiceImpl implements ISolicitudService {
 			request.setIdCliente(solicitudEntity.getIdCliente());
 			request.setDireccion(solicitudEntity.getDireccion());
 			request.setGenero(solicitudEntity.getGenero());
+			request.setScoreSarlaft(solicitudEntity.getScoreSarlaft());
 		} catch (Exception e) {
 			throw GeneralException.throwException(this, e);
 		}
@@ -210,6 +216,29 @@ public class SolicitudServiceImpl implements ISolicitudService {
 
 		} catch (Exception e) {
 
+			throw GeneralException.throwException(this, e);
+		}
+	}
+
+	public void enviarCorreoNotificacion(CorreoGenericoDto correo) throws Exception {
+
+		try {
+			String dir ="https://sb-email.mybluemix.net/api/v1/sb/email";
+			
+			String token = this.autenticar();
+			
+			org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+			headers.add("Authorization", "Bearer " + token);
+			
+			UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(dir);
+
+			String requestJson = new Gson().toJson(correo);
+
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+			String response = template.exchange(builder.toUriString(), HttpMethod.POST, entity, String.class).getBody();
+
+		} catch (Exception e) {
 			throw GeneralException.throwException(this, e);
 		}
 	}

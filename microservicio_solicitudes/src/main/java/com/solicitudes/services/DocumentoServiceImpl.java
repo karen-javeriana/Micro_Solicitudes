@@ -42,7 +42,7 @@ public class DocumentoServiceImpl implements IDocumentoService {
 	}
 
 	@Override
-	public String crearDocumento(String cedula, String historiaClinica, String email, String idGenerado)
+	public String crearDocumento(String cedula, String historiaClinica, String email, String idGenerado, String estado)
 			throws Exception {
 		Documento documento = new Documento();
 		try {
@@ -50,6 +50,7 @@ public class DocumentoServiceImpl implements IDocumentoService {
 			documento.setHistoriaClinica(historiaClinica);
 			documento.setId(idGenerado);
 			documento.setEmail(email);
+			documento.setEstado(estado);
 			documentoDao.save(documento);
 
 		} catch (Exception ex) {

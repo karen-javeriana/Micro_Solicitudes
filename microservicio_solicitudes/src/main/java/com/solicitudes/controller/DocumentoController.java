@@ -55,7 +55,8 @@ public class DocumentoController {
 				if (isTokenValid) {
 					if (idDocumentoAdjunto == null) {
 						response = new ResponseEntity<>(
-								new DocumentoResponse("El parametro {idDocumentoAdjunto} es obligatorio", false), HttpStatus.BAD_REQUEST);
+								new DocumentoResponse("El parametro {idDocumentoAdjunto} es obligatorio", false),
+								HttpStatus.BAD_REQUEST);
 					} else {
 						Documento documento = documentoService.getDocumentoPorId(idDocumentoAdjunto);
 						if (documento != null && documento.getId() != null) {
@@ -96,7 +97,7 @@ public class DocumentoController {
 	@ApiOperation(value = "Crea y procesa los documentos adjuntos", response = Boolean.class)
 	@PostMapping(value = "/documento")
 	public ResponseEntity<DocumentoResponse> crearDocumento(
-			@ApiParam(value = "Objeto json para procesar los documentos", required = true) @RequestBody DocumentoRequest request)
+			@ApiParam(value = "Objeto json para procesar los documentos") @RequestBody DocumentoRequest request)
 			throws Exception {
 
 		ResponseEntity<DocumentoResponse> response = null;
@@ -104,10 +105,18 @@ public class DocumentoController {
 		try {
 
 			if (request.getId() != null) {
-				String documentoJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
-				// Se inserta en la cola de documentos
-				iSqsService.pushSqsDocumentoFifo(documentoJson);
-				response = new ResponseEntity<>(new DocumentoResponse(null, null, null, null, true), HttpStatus.OK);
+
+				if (request.getCedula() != null && request.getHistoriaClinica() != null && request.getEmail() != null) {
+					String documentoJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
+					// Se inserta en la cola de documentos
+					iSqsService.pushSqsDocumentos(documentoJson);
+					response = new ResponseEntity<>(new DocumentoResponse(null, null, null, null, true), HttpStatus.OK);
+				} else {
+					response = new ResponseEntity<>(
+							new DocumentoResponse("Los campos {cedula} , {historiaClinica} y {email} son requeridos",
+									false),
+							HttpStatus.BAD_REQUEST);
+				}
 			} else {
 				response = new ResponseEntity<>(
 						new DocumentoResponse("El campo {id} es obligatorio para procesar los documentos", false),
