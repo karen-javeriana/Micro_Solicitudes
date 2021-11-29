@@ -62,7 +62,7 @@ public class Solicitud implements Serializable {
 	private String direccion;
 
 	private String genero;
-	
+
 	private Double scoreSarlaft;
 
 	public String getEmail() {

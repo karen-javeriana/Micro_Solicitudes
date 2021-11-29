@@ -153,7 +153,7 @@ public class SQSServiceImpl implements ISQSService {
 					iSolicitudService.actualizarSolicitud(solicitud, documento.getId(), solicitud.getEstado());
 					
 					CorreoGenericoDto infoCorreo = new CorreoGenericoDto("Estimado Cliente",
-							"Su solicitud fue asignada correctamente, pronto uno de nuestros asesores se pondra en contacto",
+							"Su solicitud fue asignada correctamente, pronto uno de nuestros asesores se pondrá en contacto",
 							"Notificación asignación solicitud", "generic", documento.getEmail(), "");
 					iSolicitudService.enviarCorreoNotificacion(infoCorreo);
 					

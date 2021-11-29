@@ -28,7 +28,7 @@ public class MapperSolicitud implements RowMapper<Solicitud> {
 			solicitud.setEmail(rs.getString("email"));
 			solicitud.setFoto(rs.getString("foto"));
 			solicitud.setTelefono(rs.getString("telefono"));
-			solicitud.setFechaNacimiento("fechaNacimiento");
+			solicitud.setFechaNacimiento(rs.getString("fechaNacimiento"));
 			solicitud.setCiudad(rs.getString("ciudad"));
 			solicitud.setPais(rs.getString("pais"));
 			solicitud.setDireccion(rs.getString("direccion"));
