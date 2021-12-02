@@ -119,12 +119,18 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 
 			for (UsuarioDto usuarioDto : listUsuarios) {
 				idUsuariosConsulta = idUsuariosConsulta + "'" + String.valueOf(usuarioDto.getIdUsuario()) + "',";
+				
+				if(!mapResult.containsKey(idUsuariosConsulta)) {
+					mapResult.put(idUsuariosConsulta, 0);
+				}
 			}
 
 			String ids = idUsuariosConsulta.substring(0, idUsuariosConsulta.length() - 1);
 			List<Solicitud> listSolicitudes = jdbcTemplate.query(String.format(
 					"SELECT * FROM Solicitud WHERE idUsuarioRevisor IN (%s) and estado <> 'RESUELTA' and estado <> 'RECHAZADA'",
 					ids), new MapperSolicitud());
+			
+			
 
 			int contador = 0;
 			for (Solicitud solicitud : listSolicitudes) {
