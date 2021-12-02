@@ -121,7 +121,7 @@ public class SolicitudDaoImpl implements ISolicitudDao {
 				idUsuariosConsulta = idUsuariosConsulta + "'" + String.valueOf(usuarioDto.getIdUsuario()) + "',";
 				
 				if(!mapResult.containsKey(idUsuariosConsulta)) {
-					mapResult.put(idUsuariosConsulta, 0);
+					mapResult.put(idUsuariosConsulta, 0); 
 				}
 			}
 
